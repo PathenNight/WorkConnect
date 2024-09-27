@@ -9,12 +9,20 @@ public class Calendar {
 
 		// Reads the user's system data to automatically get the year, month, and day
 		int year = currentDate.getYear();
-		int month = currentDate.getMonthValue();
+		int startingMonth = currentDate.getMonthValue();
 		int day = currentDate.getDayOfMonth();
 
 		// Testing to see if the correct date is being taken from the user
-		// System.out.print("The current date is: " + month + "/" + day +  "/" + year);
+		// System.out.print("The current date is: " + month + "/" + day +  "/" + year)
 
+		// Loops through the 12 months and prints them all out
+		for (int month = 1; month <= 12; month++) {
+			printMonth(year, month);
+			
+		}
+	}
+
+	public static void printMonth(int year, int month) {
 		// Gets the number of days in the current month based on the current date
 		YearMonth yearMonth = YearMonth.of(year, month);
 		int numberOfDaysInMonth = yearMonth.lengthOfMonth();
@@ -38,7 +46,7 @@ public class Calendar {
 		int startingDay = (dayOfWeekSpace % 7);
 		// Prints out the initial spaces at the start of the month
 		for (int i = 0; i < startingDay; i++)
-			System.out.print("    ");
+			System.out.print("   ");
 
 		// Prints out the days(numbers) of the month
 		for (int i = 1; i <= numberOfDaysInMonth; i++) {
@@ -49,6 +57,7 @@ public class Calendar {
 		}
 
 		System.out.println();
+
 
 	}
 
