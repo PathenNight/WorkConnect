@@ -1,8 +1,11 @@
 const express = require('express');
 const mysql = require('mysql2');
 const bodyParser = require('body-parser');
+const bcrypt = require('bcrypt'); // Import bcrypt
 const app = express();
 const port = 3000;
+
+const saltRounds = 10; // Salt rounds for hashing the password
 
 // Middleware
 app.use(bodyParser.json());
@@ -30,29 +33,47 @@ app.get('/', (req, res) => {
 });
 
 // User Registration
-app.post('/register', (req, res) => {
-    const { username, email } = req.body;
-    const query = 'INSERT INTO users (username, email) VALUES (?, ?)';
-    db.query(query, [username, email], (err, results) => {
-        if (err) {
-            console.error('Error registering user:', err);
-            return res.status(500).json({ message: 'Error registering user.' });
-        }
-        res.status(201).json({ message: 'User registered successfully.', userId: results.insertId });
-    });
+app.post('/register', async (req, res) => {
+    const { username, email, password } = req.body;
+
+    // Hash the password before storing it
+    try {
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+        const query = 'INSERT INTO users (username, email, password) VALUES (?, ?, ?)';
+        db.query(query, [username, email, hashedPassword], (err, results) => {
+            if (err) {
+                console.error('Error registering user:', err);
+                return res.status(500).json({ message: 'Error registering user.' });
+            }
+            res.status(201).json({ message: 'User registered successfully.', userId: results.insertId });
+        });
+    } catch (err) {
+        console.error('Error hashing password:', err);
+        res.status(500).json({ message: 'Error processing request.' });
+    }
 });
 
 // User Login
 app.post('/login', (req, res) => {
-    const { username } = req.body;
+    const { username, password } = req.body;
     const query = 'SELECT * FROM users WHERE username = ?';
-    db.query(query, [username], (err, results) => {
+    
+    db.query(query, [username], async (err, results) => {
         if (err) {
             console.error('Error logging in:', err);
             return res.status(500).json({ message: 'Error logging in.' });
         }
+        
         if (results.length > 0) {
-            res.json({ message: 'Login successful', user: results[0] });
+            const user = results[0];
+
+            // Compare the hashed password with the one provided
+            const match = await bcrypt.compare(password, user.password);
+            if (match) {
+                res.json({ message: 'Login successful', user: user });
+            } else {
+                res.status(401).json({ message: 'Invalid username or password.' });
+            }
         } else {
             res.status(404).json({ message: 'User not found.' });
         }
