@@ -1,0 +1,25 @@
+Created Sprint Two: 10/04/24
+
+Backend - Java
+Frontend - HTML/Javascript/CSS
+Server - SQL - Storing logins and user data
+
+Geoffrey - Server-side - Logins
+Hunter - Calendar Task/Project integration OR Deadlines
+Arthur - User hierarchy and expanding upon tasks/projects
+Blake/Erin - Frontend - Calendar/Login/Main page
+
+
+TODO:
+Register
+Login
+Logout
+Password
+Server
+Database
+Tasks and Projects
+Deadlines
+User hierarchy
+Task assignment
+Server/Client connection
+Encryption
