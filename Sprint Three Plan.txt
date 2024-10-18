@@ -1,4 +1,4 @@
-Created Sprint Two: 10/04/24
+Created Sprint Three: 10/04/24
 
 Backend - Java
 Frontend - HTML/Javascript/CSS
@@ -11,15 +11,8 @@ Blake/Erin - Frontend - Calendar/Login/Main page
 
 
 TODO:
-Register
-Login
-Logout
-Password
-Server
-Database
-Tasks and Projects
+SQL/Javascript/Java integration
 Deadlines
 User hierarchy
 Task assignment
 Server/Client connection
-Encryption
