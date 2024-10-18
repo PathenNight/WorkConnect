@@ -8,11 +8,8 @@ import java.util.*;
 public class Activity {
 
     //Constructors
-    //Assuming for now everything must have activityID + projectID
-    /*TODO: Find a way to generate the activity IDs? Likely use the same
-    idea for generating other IDs like employeeID or projectID.*/
 
-    private int id;
+    private int id; //Genereated with autoincrement in SQL
     private String name;
     private List<Integer> employeeIDs;
     private LocalDate deadline;
@@ -21,18 +18,18 @@ public class Activity {
 
     public Activity() {
         this.name = "Unnamed Activity";
-        //Generate an ID
+        //Call Javascript/SQL to generate an ID
     }
 
     public Activity(String newName) {
         this.name = newName;
-        //Generate an ID
+        //Call Javascript/SQL to generate an ID
     }
 
     public Activity(String newName, LocalDate newDeadline) {
         this.name = newName;
         this.deadline = newDeadline;
-        //Generate an ID
+        //Call Javascript/SQL to generate an ID
     }
 
 
@@ -55,6 +52,8 @@ public class Activity {
      * @param activityID The new ID for the activity
      */
     public void setactivityID(int newID) {
+        /*Because IDs are generated in SQL, this is just for the java object.
+        Other methods may actually write to SQL, but this will not.*/
         this.id = newID;
     }
 
@@ -91,8 +90,4 @@ public class Activity {
     public List<Integer> getAssociatedEmployees() {
         return this.employeeIDs;
     }
-
-    
-
-    
 }

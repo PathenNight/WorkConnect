@@ -1,5 +1,13 @@
 I'm not sure how to implement this into the main code yet, but using my
-SQL compiler, I'm writing code for tables. --Arthur
+SQL compiler, I'm writing code for tables. Users table is from the server.js code.
+
+I'd also like to discuss on Friday how we'll connect the Java/Javascript/SQL code.
+There seems to be pros and cons to Java communicating to the server directly vs
+communicating with the Javascript code, and it all depends on how the server itself
+is run and our resources, I think. From what I can tell, having Java in addition
+to Javascript communicating with the server might be best, but I want to discuss
+before starting that.
+--Arthur
 
 CREATE TABLE IF NOT EXISTS Users (
             id INT AUTO_INCREMENT PRIMARY KEY,
