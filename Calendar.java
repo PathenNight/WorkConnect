@@ -2,23 +2,50 @@ package DevProject;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.DayOfWeek;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Calendar {
+	// Creates a new list of activities and stores them in an array list
+	private List<Activity> activities;
+
+	public Calendar() {
+		activities = new ArrayList<>();
+
+	}
+
 	public static void main(String args[]) {
-		LocalDate currentDate = LocalDate.now();
+		Calendar calendar = new Calendar();
 
-		// Reads the user's system data to automatically get the year, month, and day
-		int year = currentDate.getYear();
-		int startingMonth = currentDate.getMonthValue();
-		int day = currentDate.getDayOfMonth();
+		// Testing to simulate user input
+		calendar.createActivity("Create Login Page", 10, 5, 2024, 10, 15, 2024);
+		calendar.createActivity("Test", 11, 11, 2024, 11, 11, 2024);
 
-		// Testing to see if the correct date is being taken from the user
-		// System.out.print("The current date is: " + month + "/" + day +  "/" + year)
+		calendar.displayCalendar(2024); // Displays the entire year of 2024
+		calendar.displayCalendar(2024, 10); // Displays only October of 2024
 
-		// Loops through the 12 months and prints them all out
+
+	}
+
+
+	public void createActivity(String name, int startMonth, int startDay, int startYear, int endMonth, int endDay, int endYear) {
+		LocalDate startDate = LocalDate.of(startYear, startMonth, startDay);
+		LocalDate deadLine = LocalDate.of(endYear, endMonth, endDay);
+		Activity activity = new Activity(name, startDate, deadLine);
+		activities.add(activity);
+
+	}
+
+	private void displayCalendar(int year, int month) {
+		printMonth(year, month);
+		printActivitiesInMonth(year, month);
+
+	}
+
+	private void displayCalendar(int year) {
 		for (int month = 1; month <= 12; month++) {
-			printMonth(year, month);
-			
+			displayCalendar(year, month);
+
 		}
 	}
 
@@ -55,9 +82,35 @@ public class Calendar {
 				System.out.println();
 
 		}
-
 		System.out.println();
 
+	}
+
+	private void printActivitiesInMonth(int year, int month) {
+		List<Activity> thisMonthsActivities = getActivitiesInMonth(year, month);
+		System.out.println("\nTasks and Projects for " + YearMonth.of(year, month).getMonth() + ":");
+		for (Activity activity : thisMonthsActivities) {
+			System.out.println(" - " + activity.getName() + 
+					" | Starting Date: " + (activity.getActivityStart() != null ? activity.getActivityStart() : "N/A") + 
+					" | Deadline: " + (activity.getDeadline() != null ? activity.getDeadline() : "N/A"));
+
+		}
+
+	}
+
+
+	public List<Activity> getActivitiesInMonth(int year, int month) {
+		List<Activity> thisMonthsActivities = new ArrayList<>();
+		for (Activity activity : activities) {
+			LocalDate startDate = activity.getActivityStart();
+			LocalDate deadLine = activity.getDeadline();
+			if ((startDate != null && startDate.getYear() == year && startDate.getMonthValue() == month) ||
+					(deadLine != null && deadLine.getYear() == year && deadLine.getMonthValue() == month)) {
+				thisMonthsActivities.add(activity);
+
+			}
+		}
+		return thisMonthsActivities;
 
 	}
 
