@@ -10,6 +10,25 @@ public class User {
 
     //Constructors
 
+    public User(String newEmail) {
+        //Generate an id
+        this.email = newEmail;
+    }
+
+    public User(String newEmail, String newFirstName, String newLastName) {
+        //Generate an id
+        this.email = newEmail;
+        this.firstName = newFirstName;
+        this.lastName = newLastName;
+    }
+
+    public User(int newID, String newEmail, String newFirstName, String newLastName) {
+        this.id = newID;
+        this.email = newEmail;
+        this.firstName = newFirstName;
+        this.lastName = newLastName;
+    }
+
 
 
     //Everything below are getter/setter methods
@@ -18,8 +37,8 @@ public class User {
      * @param newID The new ID of the user
      */
     public void setID(int newID) {
-        /*Because IDs are generated in SQL, this is just for the java object.
-        Other methods may actually write to SQL, but this will not.*/
+        /*Because IDs are generated in SQL, this is mostly for the java object.
+        Other methods may actually write to the database, but this might not.*/
         this.id = newID;
     }
 

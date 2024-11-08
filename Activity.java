@@ -6,9 +6,6 @@ import java.util.*;
  * employees assigned to it, and a name.
 */
 public class Activity {
-
-    //Constructors
-
     private int id; //Genereated with autoincrement in SQL
     private String name;
     private List<Integer> employeeIDs;

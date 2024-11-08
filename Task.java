@@ -20,6 +20,8 @@ public class Task extends Activity {
         super(newProjectName, newDeadline);
     }
 
+    
+
     //Getters and setters
 
     /**
