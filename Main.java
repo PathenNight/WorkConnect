@@ -12,5 +12,11 @@ public class Main {
         System.out.println(project1.getName());
 
         System.out.println(project2.getName() + " is due by " + project2.getDeadline() + ".");
+
+        Message newDueDate = new Message(18, 15);
+        Message HRTrainingReminder = new Message(25, 36, "The new HR training is due on Tuesday. Please get that done!");
+
+        System.out.println(newDueDate.getRecipientID() + " " + newDueDate.getSenderID());
+        System.out.println(HRTrainingReminder.getMessageContents());
     }
 }
