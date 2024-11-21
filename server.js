@@ -11,14 +11,14 @@ const https = require('https');
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 443; // Default to HTTPS port
+const port = process.env.PORT || 443;
 const useHttps = process.env.USE_HTTPS === 'true';
 let refreshTokens = [];
 const saltRounds = 10;
 
 // Middleware
-app.use(express.json()); // for parsing application/json
-app.use(express.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Database connection setup
 const createConnection = require('./config/db');
@@ -29,18 +29,15 @@ require('./config/setupDatabase')();
 // HTTPS Server Setup
 if (useHttps) {
     const httpsOptions = {
-        key: fs.readFileSync(path.join(__dirname, 'certificates', 'server.key')), // Relative path to SSL key
-        cert: fs.readFileSync(path.join(__dirname, 'certificates', 'server.cert')) // Relative path to SSL cert
+        key: fs.readFileSync(path.join(__dirname, 'certificates', 'server.key')),
+        cert: fs.readFileSync(path.join(__dirname, 'certificates', 'server.cert'))
     };
 
     const httpsServer = https.createServer(httpsOptions, app);
-
-    // Listen on all network interfaces to allow external access
     httpsServer.listen(port, '0.0.0.0', () => {
         console.log(`HTTPS server is running on https://localhost:${port}`);
     });
 } else {
-    // Fallback to HTTP if USE_HTTPS is not enabled
     app.listen(port, '0.0.0.0', () => {
         console.log(`HTTP server is running on http://localhost:${port}`);
     });
