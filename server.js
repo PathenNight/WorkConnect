@@ -5,18 +5,20 @@ const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const dotenv = require('dotenv');
 const fs = require('fs');
+const path = require('path');
 const https = require('https');
 
 dotenv.config();
 
 const app = express();
-const port = 443; // HTTPS port
+const port = process.env.PORT || 443;
+const useHttps = process.env.USE_HTTPS === 'true';
 let refreshTokens = [];
 const saltRounds = 10;
 
 // Middleware
-app.use(express.json()); // for parsing application/json
-app.use(express.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Database connection setup
 const createConnection = require('./config/db');
@@ -25,17 +27,21 @@ const createConnection = require('./config/db');
 require('./config/setupDatabase')();
 
 // HTTPS Server Setup
-const httpsOptions = {
-    key: fs.readFileSync('C:\\Windows\\System32\\server.key'),  // Path to your SSL key
-    cert: fs.readFileSync('C:\\Windows\\System32\\server.cert') // Path to your SSL cert
-};
+if (useHttps) {
+    const httpsOptions = {
+        key: fs.readFileSync(path.join(__dirname, 'certificates', 'server.key')),
+        cert: fs.readFileSync(path.join(__dirname, 'certificates', 'server.cert'))
+    };
 
-const httpsServer = https.createServer(httpsOptions, app);
-
-// Listen on all network interfaces to allow external access
-httpsServer.listen(port, '0.0.0.0', () => {
-    console.log(`HTTPS server is running on https://localhost:${port}`);
-});
+    const httpsServer = https.createServer(httpsOptions, app);
+    httpsServer.listen(port, '0.0.0.0', () => {
+        console.log(`HTTPS server is running on https://localhost:${port}`);
+    });
+} else {
+    app.listen(port, '0.0.0.0', () => {
+        console.log(`HTTP server is running on http://localhost:${port}`);
+    });
+}
 
 // Import routes
 const authRoutes = require('./routes/auth');
