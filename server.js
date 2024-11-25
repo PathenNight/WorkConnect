@@ -11,14 +11,14 @@ const https = require('https');
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 443;
+const port = process.env.PORT || 443; // Default to HTTPS port
 const useHttps = process.env.USE_HTTPS === 'true';
 let refreshTokens = [];
 const saltRounds = 10;
 
 // Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json()); // for parsing application/json
+app.use(express.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
 // Database connection setup
 const createConnection = require('./config/db');
@@ -29,15 +29,18 @@ require('./config/setupDatabase')();
 // HTTPS Server Setup
 if (useHttps) {
     const httpsOptions = {
-        key: fs.readFileSync(path.join(__dirname, 'certificates', 'server.key')),
-        cert: fs.readFileSync(path.join(__dirname, 'certificates', 'server.cert'))
+        key: fs.readFileSync(path.join(__dirname, 'certificates', 'server.key')), // Relative path to SSL key
+        cert: fs.readFileSync(path.join(__dirname, 'certificates', 'server.cert')) // Relative path to SSL cert
     };
 
     const httpsServer = https.createServer(httpsOptions, app);
+
+    // Listen on all network interfaces to allow external access
     httpsServer.listen(port, '0.0.0.0', () => {
         console.log(`HTTPS server is running on https://localhost:${port}`);
     });
 } else {
+    // Fallback to HTTP if USE_HTTPS is not enabled
     app.listen(port, '0.0.0.0', () => {
         console.log(`HTTP server is running on http://localhost:${port}`);
     });
@@ -46,10 +49,14 @@ if (useHttps) {
 // Import routes
 const authRoutes = require('./routes/auth');
 const passwordRoutes = require('./routes/password');
+const messageRoutes = require('./routes/message');
+const calendarRoutes = require('./routes/calendar'); // Import calendar routes
 
 // Use routes
 app.use('/auth', authRoutes);
 app.use('/password', passwordRoutes);
+app.use('/messages', messageRoutes);
+app.use('/calendar', calendarRoutes); // Mount calendar routes
 
 // Server Verification
 app.get('/', (req, res) => {

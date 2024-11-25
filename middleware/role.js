@@ -1,9 +1,11 @@
-const authorizeRole = (role) => {
+const authorizeRole = (allowedRoles) => {
     return (req, res, next) => {
-        if (req.user.role !== role) {
-            return res.sendStatus(403);
+        // Check if the user has one of the allowed roles
+        if (!allowedRoles.includes(req.user.role)) {
+            console.error(`Access denied for user ${req.user.username} with role ${req.user.role}`);
+            return res.status(403).json({ message: 'Access denied: insufficient role' });
         }
-        next();
+        next(); // If user role is valid, continue to next middleware/route handler
     };
 };
 

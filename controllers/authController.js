@@ -1,14 +1,14 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const createConnection = require('../config/db');
+const createConnection = require('../config/db');  // Assuming you're handling the connection pooling here
 
-let refreshTokens = [];
+let refreshTokens = [];  // In-memory storage (use DB or cache in production)
 const saltRounds = 10;
 
 // User Registration Logic
 const register = async (req, res) => {
-    const { username, email, password } = req.body;
-    const connection = await createConnection();
+    const { username, email, password, role } = req.body; // Role is optional
+    const connection = await createConnection(); // Use connection pooling in production
 
     try {
         const [existingUser] = await connection.query('SELECT * FROM Users WHERE username = ? OR email = ?', [username, email]);
@@ -17,20 +17,22 @@ const register = async (req, res) => {
         }
 
         const hashedPassword = await bcrypt.hash(password, saltRounds);
-        await connection.query('INSERT INTO Users (username, email, password, role) VALUES (?, ?, ?, ?)', [username, email, hashedPassword, 'admin']);
+        const userRole = role || 'user';  // Default to 'user' role if not provided
+
+        await connection.query('INSERT INTO Users (username, email, password, role) VALUES (?, ?, ?, ?)', [username, email, hashedPassword, userRole]);
         res.status(201).json({ message: "User registered successfully." });
     } catch (error) {
         console.error("Registration error:", error);
         res.status(500).json({ message: "Error registering user." });
     } finally {
-        await connection.end(); // Close the connection
+        await connection.end();  // Close the connection
     }
 };
 
 // User Login Logic
 const login = async (req, res) => {
     const { username, password } = req.body;
-    const connection = await createConnection();
+    const connection = await createConnection(); // Use connection pooling in production
 
     try {
         const [user] = await connection.query('SELECT * FROM Users WHERE username = ?', [username]);
@@ -43,7 +45,9 @@ const login = async (req, res) => {
             const accessToken = jwt.sign({ id: user[0].id, role: user[0].role }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
             const refreshToken = jwt.sign({ id: user[0].id }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
 
+            // Optionally persist the refresh token in a database or cache
             refreshTokens.push(refreshToken);
+
             return res.json({ message: 'Login successful', accessToken, refreshToken });
         } else {
             return res.status(401).json({ message: 'Invalid username or password.' });
@@ -75,7 +79,7 @@ const refreshToken = (req, res) => {
 // Logout logic
 const logout = (req, res) => {
     const { token } = req.body;
-    refreshTokens = refreshTokens.filter(rt => rt !== token);
+    refreshTokens = refreshTokens.filter(rt => rt !== token);  // Remove the refresh token
     res.json({ message: 'Logout successful' });
 };
 
