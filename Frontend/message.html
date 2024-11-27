@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WorkConnect</title>
+    <link rel="icon" type="image/x-icon" href="./images/favicon.png">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="message.css">
+    <script src="script.js"></script>
+</head>
+<body>
+<header>
+    <h1>WorkConnect</h1>
+</header>
+<script src="message.js"></script>
+<nav>
+    <!--index.html might want to be renamed to calendar.html for clarity.
+    We can still think of it as our index. The index doesn't need to be named "index.html", I think.-->
+    <a href="index.html">Calendar</a>
+    <a href="#message">Messages</a>
+    <a href="profile.html">
+        <img src="./images/defaultProfile.png" alt="Profile">
+    </a>
+</nav>
+
+
+<div class="container">
+    <h1>Chat Between Person A and Person B</h1>
+
+    <!-- Display area for chat messages -->
+    <div id="chatBox" class="chat-box">
+        <!-- Messages will be displayed here -->
+    </div>
+
+    <!-- Form for sending a message -->
+    <h2>Send a Message:</h2>
+    <form id="messageForm">
+        <textarea id="userMessage" placeholder="Type your message here..." required></textarea><br>
+        <button type="submit">Send Message</button>
+    </form>
+
+    <!--For testing that the messages appear how we want-->
+    <h2>Test Add Message</h2>
+    <button onclick="addMessage('Person A', 'Hello from Person A!')">Add Message from Person A</button>
+    <button onclick="addMessage('Person B', 'Hello from Person B!')">Add Message from Person B</button>
+
+</div>
+</form>
+<main>
+</main>
+<footer>
+    <p>&copy; 2024 WorkConnect. All rights reserved.</p>
+</footer>
+</body>
+</html>
