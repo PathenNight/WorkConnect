@@ -26,23 +26,29 @@ function addMessage(sender, message) {
 }
 
 // Handle form submission
-document.getElementById("messageForm").addEventListener("submit", function(event) {
-    event.preventDefault();  // Prevents the form from refreshing the page
+document.addEventListener('DOMContentLoaded', function() {
+    function submitEvent(event) {
+        event.preventDefault();  // Prevents the form from refreshing the page
+        console.log("event1 added");
 
-    // Get the value of the user's message
-    const userMessage = document.getElementById("userMessage").value;
+        // Get the value of the user's message
+        const userMessage = document.getElementById("userMessage").value;
 
-    // Check if the message is not empty
-    if (userMessage.trim() !== "") {
-        // Add the message to the chat box
-        addMessage(currentSender, userMessage);
+        // Check if the message is not empty
+        if (userMessage.trim() !== "") {
+            // Add the message to the chat box
+            addMessage(currentSender, userMessage);
 
-        // Clear the input field after sending
-        document.getElementById("userMessage").value = "";
+            // Clear the input field after sending
+            document.getElementById("userMessage").value = "";
 
-        // Toggle the sender for the next message
-        currentSender = currentSender === "Person A" ? "Person B" : "Person A";
-    } else {
-        alert("Please type a message before submitting!");
+            // Toggle the sender for the next message
+            currentSender = currentSender === "Person A" ? "Person B" : "Person A";
+        } else {
+            alert("Please type a message before submitting!");
+        }
     }
+
+    // Attach the event listener
+    document.getElementById("messageForm").addEventListener("submit", submitEvent);
 });
