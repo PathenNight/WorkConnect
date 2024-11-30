@@ -1,7 +1,13 @@
 // Initialize a variable to keep track of who is sending the next message
 let currentSender = "Person A";
 
-// Function to add a new message to the chat box
+/**Adds a message to the chatbox. The appearance changes based on the
+ * sender and the message.
+ * 
+ * @param {*} sender The sender of the message; can either be the user 
+ * or their conversation partner
+ * @param {*} message The contents of the message sent
+ */
 function addMessage(sender, message) {
     const chatBox = document.getElementById("chatBox");
 
@@ -25,11 +31,12 @@ function addMessage(sender, message) {
     chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-// Handle form submission
+/**Handle form submission
+ * 
+*/
 document.addEventListener('DOMContentLoaded', function() {
     function submitEvent(event) {
         event.preventDefault();  // Prevents the form from refreshing the page
-        console.log("event1 added");
 
         // Get the value of the user's message
         const userMessage = document.getElementById("userMessage").value;

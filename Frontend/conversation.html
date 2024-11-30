@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WorkConnect</title>
+    <link rel="icon" type="image/x-icon" href="./images/favicon.png">
+    <link rel="stylesheet" href="styles.css">
+    <script src="script.js"></script>
+    <script src="conversation.js"></script>
+</head>
+<body>
+<header>
+    <h1>WorkConnect</h1>
+</header>
+<nav>
+    <a href="index.html">Calendar</a>
+    <a href="#conversation">Messages</a>
+    <a href="profile.html">
+        <img src="./images/defaultProfile.png" alt="Profile">
+    </a>
+</nav>
+
+<!--TODO: Make it so the conversation and message page communicate with each other.-->
+<div class="container">
+    <div id="conversationBox" class="conversation-box">
+        <!-- Conversations will be displayed here -->
+    </div>
+</div>
+
+
+<button onclick="addConversation('Person B')">Add conversation with Person B</button>
+
+
+<main>
+</main>
+<footer>
+    <p>&copy; 2024 WorkConnect. All rights reserved.</p>
+</footer>
+</body>
+</html>
