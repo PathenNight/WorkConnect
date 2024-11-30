@@ -7,35 +7,58 @@ const saltRounds = 10;
 
 // User Registration Logic
 const register = async (req, res) => {
-    const { username, email, password, role } = req.body; // Role is optional
-    const connection = await createConnection(); // Use connection pooling in production
+    const { username, email, password, role } = req.body;
+
+    // Basic Validation
+    if (!username || !email || !password) {
+        return res.status(400).json({ message: "Username, email, and password are required." });
+    }
+
+    const connection = await createConnection(); // Connection pooling recommended
 
     try {
-        const [existingUser] = await connection.query('SELECT * FROM Users WHERE username = ? OR email = ?', [username, email]);
+        // Check for existing user
+        const [existingUser] = await connection.query(
+            'SELECT * FROM Users WHERE username = ? OR email = ?',
+            [username, email]
+        );
+        console.log("Existing User Check:", existingUser);
+
         if (existingUser.length > 0) {
             return res.status(409).json({ message: "Username or email already exists." });
         }
 
+        // Hash password
         const hashedPassword = await bcrypt.hash(password, saltRounds);
-        const userRole = role || 'user';  // Default to 'user' role if not provided
+        const userRole = role || 'user';
 
-        await connection.query('INSERT INTO Users (username, email, password, role) VALUES (?, ?, ?, ?)', [username, email, hashedPassword, userRole]);
+        // Insert new user
+        await connection.query(
+            'INSERT INTO Users (username, email, password, role) VALUES (?, ?, ?, ?)',
+            [username, email, hashedPassword, userRole]
+        );
+
         res.status(201).json({ message: "User registered successfully." });
     } catch (error) {
         console.error("Registration error:", error);
-        res.status(500).json({ message: "Error registering user." });
+        res.status(500).json({ message: "Error registering user.", error: error.message }); // Include error details temporarily
     } finally {
-        await connection.end();  // Close the connection
+        await connection.end(); // Close the connection
     }
 };
 
 // User Login Logic
 const login = async (req, res) => {
-    const { username, password } = req.body;
-    const connection = await createConnection(); // Use connection pooling in production
+    const { usernameOrEmail, password } = req.body;
+    const connection = await createConnection();
 
     try {
-        const [user] = await connection.query('SELECT * FROM Users WHERE username = ?', [username]);
+        // Search for the user by either username or email
+        const [user] = await connection.query(
+            'SELECT * FROM Users WHERE username = ? OR email = ?',
+            [usernameOrEmail, usernameOrEmail]
+        );
+
         if (user.length === 0) {
             return res.status(404).json({ message: 'User not found.' });
         }
@@ -45,7 +68,7 @@ const login = async (req, res) => {
             const accessToken = jwt.sign({ id: user[0].id, role: user[0].role }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
             const refreshToken = jwt.sign({ id: user[0].id }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
 
-            // Optionally persist the refresh token in a database or cache
+            // Persist refresh token if needed
             refreshTokens.push(refreshToken);
 
             return res.json({ message: 'Login successful', accessToken, refreshToken });
@@ -56,7 +79,7 @@ const login = async (req, res) => {
         console.error("Login error:", error);
         res.status(500).json({ message: 'Error logging in.' });
     } finally {
-        await connection.end(); // Close the connection
+        await connection.end();
     }
 };
 
