@@ -1,5 +1,6 @@
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
+const bcrypt = require('bcrypt'); // Add bcrypt import
 const createConnection = require('../config/db');
 
 // Set up Nodemailer
@@ -23,11 +24,12 @@ const forgotPassword = async (req, res) => {
         }
 
         const resetToken = crypto.randomBytes(32).toString('hex');
+        const hashedResetToken = crypto.createHash('sha256').update(resetToken).digest('hex'); // Hash the token before saving
         const expiry = new Date(Date.now() + 3600000); // 1 hour
 
-        await connection.query('UPDATE Users SET resetToken = ?, resetTokenExpiry = ? WHERE email = ?', [resetToken, expiry, email]);
+        await connection.query('UPDATE Users SET resetToken = ?, resetTokenExpiry = ? WHERE email = ?', [hashedResetToken, expiry, email]);
 
-        const resetUrl = `http://yourdomain.com/reset/${resetToken}`;
+        const resetUrl = `http://yourdomain.com/reset/${resetToken}`; // Make sure to replace yourdomain.com with your actual domain
         const mailOptions = {
             from: process.env.EMAIL_USER,
             to: email,
@@ -51,7 +53,8 @@ const resetPassword = async (req, res) => {
     const connection = await createConnection();
 
     try {
-        const [user] = await connection.query('SELECT * FROM Users WHERE resetToken = ? AND resetTokenExpiry > NOW()', [token]);
+        const hashedToken = crypto.createHash('sha256').update(token).digest('hex'); // Hash the token for verification
+        const [user] = await connection.query('SELECT * FROM Users WHERE resetToken = ? AND resetTokenExpiry > NOW()', [hashedToken]);
         if (user.length === 0) {
             return res.status(400).json({ message: 'Invalid or expired token' });
         }
@@ -71,3 +74,4 @@ module.exports = {
     forgotPassword,
     resetPassword
 };
+
