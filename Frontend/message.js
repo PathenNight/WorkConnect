@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Check if the message is not empty
         if (userMessage.trim() !== "") {
             // Add the message to the chat box
-            addMessage(currentSender, userMessage);
+            addMessage(userName, userMessage);
 
             // Clear the input field after sending
             document.getElementById("userMessage").value = "";
