@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WorkConnect</title>
+    <link rel="icon" type="image/x-icon" href="./images/favicon.png">
+    <link rel="stylesheet" href="styles.css">
+    <script src="script.js"></script>
+</head>
+<body>
+<header>
+    <h1>WorkConnect</h1>
+</header>
+<script src="message.js"></script>
+<nav>
+    <a href="index.html">Calendar</a>
+    <a href="conversation.html">Messages</a>
+    <a href="profile.html">
+        <img src="./images/defaultProfile.png" alt="Profile">
+    </a>
+</nav>
+
+
+<div class="container">
+
+    <!-- Display area for chat messages -->
+    <div id="chatBox" class="chat-box">
+        <!-- Messages will be displayed here -->
+    </div>
+
+    <!-- Form for sending a message -->
+     
+    <!--TODO: Make sure the messages aren't empty; will have to do so in Javascript-->
+    <h2>Send a Message:</h2>
+    <form id="messageForm">
+        <textarea id="userMessage" placeholder="Type your message here..." required></textarea><br>
+        <button type="submit">Send Message</button>
+    </form>
+    
+    <!--Buttons for testing that the messages appear how we want. Feel free to delete or comment out-->
+    <h2>Test Add Message</h2>
+    <button onclick="addMessage('John', 'Hello from User!')">Add Message from User</button>
+    <button onclick="addMessage('Terri', 'Hello from Terri!')">Add Message from Terri</button>
+    <button onclick="addMessage('Lola', 'Hello from Lola!')">Add Message from Lola</button>
+
+</div>
+</form>
+<main>
+</main>
+<footer>
+    <p>&copy; 2024 WorkConnect. All rights reserved.</p>
+</footer>
+</body>
+</html>
