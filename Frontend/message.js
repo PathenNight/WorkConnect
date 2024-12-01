@@ -1,6 +1,13 @@
 // Initialize a variable to keep track of who is sending the next message
 let currentSender = "Person A";
 
+userName = "John";
+
+const params = new URLSearchParams(window.location.search);
+const partnerName = params.get('conversationPartner');
+console.log(partnerName);
+
+
 /**Adds a message to the chatbox. The appearance changes based on the
  * sender and the message.
  * 
@@ -15,13 +22,13 @@ function addMessage(sender, message) {
     const messageDiv = document.createElement("div");
     messageDiv.classList.add("message");
 
-    // Add appropriate class for Person A or Person B
-    if (sender === "Person A") {
-        messageDiv.classList.add("message-person-a");
-        messageDiv.innerHTML = `<strong>Person A:</strong> ${message}`;
+    // Add appropriate class for user or their conversation partner
+    if (sender === userName) {
+        messageDiv.classList.add("message-user");
+        messageDiv.innerHTML = `<strong>${userName}:</strong> ${message}`;
     } else {
-        messageDiv.classList.add("message-person-b");
-        messageDiv.innerHTML = `<strong>Person B:</strong> ${message}`;
+        messageDiv.classList.add("message-partner");
+        messageDiv.innerHTML = `<strong>${partnerName}:</strong> ${message}`;
     }
 
     // Append the new message to the chat box
@@ -50,7 +57,7 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById("userMessage").value = "";
 
             // Toggle the sender for the next message
-            currentSender = currentSender === "Person A" ? "Person B" : "Person A";
+            currentSender = currentSender === userName ? partnerName : userName;
         } else {
             alert("Please type a message before submitting!");
         }

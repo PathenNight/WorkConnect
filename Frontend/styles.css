@@ -159,13 +159,13 @@ body {
             border-radius: 8px;
         }
         
-        .message-person-a {
+        .message-user {
             background-color: #e0f7fa;
             text-align: left;
             align-self: flex-start;
         }
         
-        .message-person-b {
+        .message-partner {
             background-color: #ffecb3;
             text-align: right;
             align-self: flex-end;
