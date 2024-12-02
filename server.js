@@ -11,7 +11,7 @@ const https = require('https');
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 443; // Default to HTTPS port
+const port = process.env.PORT || 3000; // Default to HTTPS port
 const useHttps = process.env.USE_HTTPS === 'true';
 let refreshTokens = [];
 const saltRounds = 10;
@@ -19,6 +19,9 @@ const saltRounds = 10;
 // Middleware
 app.use(express.json()); // for parsing application/json
 app.use(express.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
+
+// Middleware to serve static files
+app.use(express.static(path.join(__dirname, 'Frontend')));
 
 // Database connection setup
 const createConnection = require('./config/db');

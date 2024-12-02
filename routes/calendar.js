@@ -18,29 +18,36 @@ router.get('/', (req, res) => {
   }
 });
 
-// Route to create an activity (add calendar event)
-router.post('/create', (req, res) => {
-  const { name, startMonth, startDay, startYear, endMonth, endDay, endYear } = req.body;
-  try {
-    calendar.createActivity(name, startMonth, startDay, startYear, endMonth, endDay, endYear);
-    res.status(201).json({ message: 'Activity added successfully' });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Failed to add activity' });
-  }
-});
-
-// Route to get calendar for a specific month and year
-router.get('/month/:year/:month', (req, res) => {
-  const { year, month } = req.params;
-  try {
-    calendar.displayCalendar(Number(year), Number(month));
-    res.status(200).json({ message: 'Calendar displayed in console' });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Failed to display calendar' });
-  }
-});
+// Add a calendar event, task, or project (POST)
+router.post('/create', async (req, res) => {
+    const { title, description, startMonth, startDay, startYear, endMonth, endDay, endYear, isProject } = req.body;
+  
+    try {
+      if (isProject) {
+        // Insert into the Projects table
+        const startDate = `${startYear}-${startMonth}-${startDay}`;
+        const endDate = `${endYear}-${endMonth}-${endDay}`;
+        const [result] = await pool.query(
+          'INSERT INTO Projects (name, description, start_date, end_date) VALUES (?, ?, ?, ?)',
+          [title, description, startDate, endDate]
+        );
+        res.status(201).json({ message: 'Project added successfully', projectId: result.insertId });
+      } else {
+        // Insert into the Tasks table or Calendar table
+        const startDate = `${startYear}-${startMonth}-${startDay}`;
+        const endDate = `${endYear}-${endMonth}-${endDay}`;
+        const [result] = await pool.query(
+          'INSERT INTO Tasks (title, description, due_date) VALUES (?, ?, ?)',
+          [title, description, startDate] // Example: due_date is the start date
+        );
+        res.status(201).json({ message: 'Task added successfully', taskId: result.insertId });
+      }
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: 'Failed to add task or project' });
+    }
+  });
+  
 
 // --- Task & Project Routes (Integrated with Calendar) ---
 
