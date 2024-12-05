@@ -1,31 +1,32 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const createConnection = require('../config/db');  // Assuming you're handling the connection pooling here
+const User = require('../models/user');  // Assuming you have a User model
 
 let refreshTokens = [];  // In-memory storage (use DB or cache in production)
 const saltRounds = 10;
 
 // User Registration Logic
 const register = async (req, res) => {
-    const { username, email, password, role } = req.body;
+    const { username, email, password, role, organizationName, securityQuestion, securityAnswer, recoveryKey } = req.body;
 
     // Basic Validation
-    if (!username || !email || !password) {
+    if (!username || !email || !password || !organizationName || !securityQuestion || !securityAnswer || !recoveryKey) {
         return res.status(400).json({ message: "Username, email, and password are required." });
     }
 
     const connection = await createConnection(); // Connection pooling recommended
 
     try {
-        // Check for existing user
+        // Check for existing user by email (since the front end sends email)
         const [existingUser] = await connection.query(
-            'SELECT * FROM Users WHERE username = ? OR email = ?',
-            [username, email]
+            'SELECT * FROM Users WHERE email = ?',
+            [email]
         );
         console.log("Existing User Check:", existingUser);
 
         if (existingUser.length > 0) {
-            return res.status(409).json({ message: "Username or email already exists." });
+            return res.status(409).json({ message: "Email already exists." });
         }
 
         // Hash password
@@ -34,8 +35,8 @@ const register = async (req, res) => {
 
         // Insert new user
         await connection.query(
-            'INSERT INTO Users (username, email, password, role) VALUES (?, ?, ?, ?)',
-            [username, email, hashedPassword, userRole]
+            'INSERT INTO Users (username, email, password, role, organizationName, securityQuestion, securityAnswer, recoveryKey) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [username, email, hashedPassword, userRole, organizationName, securityQuestion, securityAnswer, recoveryKey]
         );
 
         res.status(201).json({ message: "User registered successfully." });
@@ -102,8 +103,75 @@ const refreshToken = (req, res) => {
 // Logout logic
 const logout = (req, res) => {
     const { token } = req.body;
-    refreshTokens = refreshTokens.filter(rt => rt !== token);  // Remove the refresh token
-    res.json({ message: 'Logout successful' });
+    
+    if (!token) {
+        return res.status(400).json({ message: 'Token is required' }); // Bad request if token is missing
+    }
+    
+    // Assuming refreshTokens is an array that stores all active refresh tokens
+    const tokenIndex = refreshTokens.indexOf(token);
+    
+    if (tokenIndex === -1) {
+        return res.status(400).json({ message: 'Token not found' }); // If token isn't in the list
+    }
+
+    // Remove the refresh token
+    refreshTokens.splice(tokenIndex, 1);
+
+    return res.status(200).json({ message: 'Logout successful' }); // Success response
+};
+
+// Update user information
+const updateUser = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { Name, Email, Password, OrganizationName } = req.body;
+
+        // Find the user by ID
+        let user = await User.findById(id);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // Hash password if it's updated
+        let updatedPassword = Password;
+        if (Password) {
+            updatedPassword = await bcrypt.hash(Password, 10);
+        }
+
+        // Update user information
+        user.Name = Name || user.Name;
+        user.Email = Email || user.Email;
+        user.Password = updatedPassword;
+        user.OrganizationName = OrganizationName || user.OrganizationName;
+
+        // Save the updated user
+        await user.save();
+
+        res.status(200).json({ message: 'User updated successfully' });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to update user' });
+    }
+};
+
+// This will be your backend function to return security questions
+const getSecurityQuestions = (req, res) => {
+    const questions = [
+        "What was the name of your first pet?",
+        "What is your mother's maiden name?",
+        "What was the name of your elementary school?",
+        "What was the make of your first car?",
+        "In what city were you born?",
+        "What is your favorite book?",
+        "What is your favorite food?",
+        "What was your childhood nickname?",
+        "What was the name of your best friend?",
+        "What is the name of your favorite pet?"
+    ];
+    
+    res.json({ questions });
 };
 
 module.exports = {
@@ -111,4 +179,6 @@ module.exports = {
     login,
     refreshToken,
     logout,
+    getSecurityQuestions,
+    updateUser
 };
