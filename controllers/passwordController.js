@@ -1,6 +1,7 @@
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
-const createConnection = require('../config/db');
+const bcrypt = require('bcrypt');
+const pool = require('../config/db'); // Use shared connection pool
 
 // Set up Nodemailer
 const transporter = nodemailer.createTransport({
@@ -11,23 +12,27 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-// Request password reset logic
+// --- Forgot Password ---
 const forgotPassword = async (req, res) => {
     const { email } = req.body;
-    const connection = await createConnection();
 
     try {
-        const [user] = await connection.query('SELECT * FROM Users WHERE email = ?', [email]);
+        const [user] = await pool.query('SELECT * FROM Users WHERE email = ?', [email]);
         if (user.length === 0) {
             return res.status(404).json({ message: 'User not found' });
         }
 
         const resetToken = crypto.randomBytes(32).toString('hex');
-        const expiry = new Date(Date.now() + 3600000); // 1 hour
+        const hashedResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+        const expiry = new Date(Date.now() + 3600000); // 1 hour expiry
 
-        await connection.query('UPDATE Users SET resetToken = ?, resetTokenExpiry = ? WHERE email = ?', [resetToken, expiry, email]);
+        await pool.query('UPDATE Users SET resetToken = ?, resetTokenExpiry = ? WHERE email = ?', [
+            hashedResetToken,
+            expiry,
+            email
+        ]);
 
-        const resetUrl = `http://yourdomain.com/reset/${resetToken}`;
+        const resetUrl = `${process.env.FRONTEND_URL}/reset/${resetToken}`;
         const mailOptions = {
             from: process.env.EMAIL_USER,
             to: email,
@@ -38,36 +43,99 @@ const forgotPassword = async (req, res) => {
         await transporter.sendMail(mailOptions);
         res.json({ message: 'Password reset link sent to your email.' });
     } catch (error) {
-        console.error("Password reset error:", error);
+        console.error('Password reset error:', error);
         res.status(500).json({ message: 'Error requesting password reset.' });
-    } finally {
-        await connection.end(); // Close the connection
     }
 };
 
-// Reset password logic
+// --- Reset Password ---
 const resetPassword = async (req, res) => {
     const { token, newPassword } = req.body;
-    const connection = await createConnection();
 
     try {
-        const [user] = await connection.query('SELECT * FROM Users WHERE resetToken = ? AND resetTokenExpiry > NOW()', [token]);
+        const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+        const [user] = await pool.query('SELECT * FROM Users WHERE resetToken = ? AND resetTokenExpiry > NOW()', [
+            hashedToken
+        ]);
+
         if (user.length === 0) {
             return res.status(400).json({ message: 'Invalid or expired token' });
         }
 
         const hashedPassword = await bcrypt.hash(newPassword, 10);
-        await connection.query('UPDATE Users SET password = ?, resetToken = NULL, resetTokenExpiry = NULL WHERE id = ?', [hashedPassword, user[0].id]);
+        await pool.query('UPDATE Users SET password = ?, resetToken = NULL, resetTokenExpiry = NULL WHERE id = ?', [
+            hashedPassword,
+            user[0].id
+        ]);
+
         res.json({ message: 'Password reset successfully.' });
     } catch (error) {
-        console.error("Error resetting password:", error);
+        console.error('Error resetting password:', error);
         res.status(500).json({ message: 'Error resetting password.' });
-    } finally {
-        await connection.end(); // Close the connection
     }
 };
 
+// --- Recover by Key ---
+const recoverByKey = async (req, res) => {
+    const { recoveryKey } = req.body;
+
+    try {
+        const [user] = await pool.query('SELECT * FROM Users WHERE recoveryKey = ?', [recoveryKey]);
+        if (user.length === 0) {
+            return res.status(404).json({ found: false });
+        }
+
+        res.json({ found: true, email: user[0].email });
+    } catch (error) {
+        console.error('Error recovering by key:', error);
+        res.status(500).json({ message: 'Error recovering account.' });
+    }
+};
+
+// --- Recover by Email ---
+const recoverByEmail = async (req, res) => {
+    const { email } = req.body;
+
+    try {
+        const [user] = await pool.query('SELECT * FROM Users WHERE email = ?', [email]);
+        if (user.length === 0) {
+            return res.status(404).json({ found: false });
+        }
+
+        res.json({ found: true, securityQuestion: user[0].securityQuestion });
+    } catch (error) {
+        console.error('Error recovering by email:', error);
+        res.status(500).json({ message: 'Error recovering account.' });
+    }
+};
+
+// --- Verify Security Question Answer ---
+const verifyAnswer = async (req, res) => {
+    const { email, answer } = req.body;
+
+    try {
+        const [user] = await pool.query('SELECT * FROM Users WHERE email = ?', [email]);
+        if (user.length === 0) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const isAnswerCorrect = await bcrypt.compare(answer, user[0].securityAnswer);
+        if (isAnswerCorrect) {
+            res.json({ correct: true });
+        } else {
+            res.status(400).json({ correct: false });
+        }
+    } catch (error) {
+        console.error('Error verifying answer:', error);
+        res.status(500).json({ message: 'Error verifying answer.' });
+    }
+};
+
+// Export the functions
 module.exports = {
     forgotPassword,
-    resetPassword
+    resetPassword,
+    recoverByKey,
+    recoverByEmail,
+    verifyAnswer
 };
