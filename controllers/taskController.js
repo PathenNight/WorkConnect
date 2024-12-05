@@ -1,45 +1,21 @@
-// controllers/taskController.js
-const { createConnection } = require('mysql2/promise');  // Ensure you're using mysql2/promise
+const Task = require('../models/Task');
+const Project = require('../models/Project');
 
-// Function to add a task
-const addTask = async (req, res) => {
-    const { userId, taskName, taskDate } = req.body;
+exports.createTask = async (req, res) => {
+    const { name, startDate, deadline, projectID } = req.body;
+
     try {
-        // Establish a database connection
-        const connection = await createConnection({ /* your db config */ });
+        const task = new Task(name, null, deadline);
+        task.setActivityProject(projectID); // Link task to a project
+        await task.save();
 
-        // Query to insert task
-        const query = 'INSERT INTO Tasks (userId, taskName, taskDate) VALUES (?, ?, ?)';
-        await connection.query(query, [userId, taskName, taskDate]);
+        const project = new Project(); // Fetch or initialize the project
+        project.addTask(task.id);
+        await project.save(); // Save project with updated task list
 
-        // Close connection after the query
-        await connection.end();
-
-        res.status(201).json({ message: 'Task added successfully' });
+        res.status(201).json({ message: 'Task created successfully', task });
     } catch (error) {
-        console.error('Error adding task:', error);
-        res.status(500).json({ message: 'Error adding task' });
+        console.error(error);
+        res.status(500).json({ message: 'Error creating task' });
     }
 };
-
-// Function to get tasks for a user
-const getUserTasks = async (req, res) => {
-    const { userID } = req.params;
-    try {
-        // Establish a database connection
-        const connection = await createConnection({ /* your db config */ });
-
-        // Query to get tasks for the specific user
-        const [tasks] = await connection.query('SELECT * FROM Tasks WHERE userId = ?', [userID]);
-
-        // Close connection after the query
-        await connection.end();
-
-        res.json({ tasks });
-    } catch (error) {
-        console.error('Error fetching tasks:', error);
-        res.status(500).json({ message: 'Error fetching tasks' });
-    }
-};
-
-module.exports = { addTask, getUserTasks };
