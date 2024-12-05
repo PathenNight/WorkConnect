@@ -1,0 +1,846 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+  }
+  img{
+    cursor:pointer
+  }
+  
+  input{
+    width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+  }
+  
+  button {
+    width: 100%;
+    padding: 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .btn-option-yes {
+    background: linear-gradient(145deg, #6dbf84, #4f9e61); /* Soft green gradient */
+    border: none;
+    padding: 12px 25px;
+    margin-bottom: 15px;
+    margin-top: 30px;
+    cursor: pointer;
+    border-radius: 25px; /* Rounded corners */
+    font-size: 16px;
+    font-weight: bold;
+    transition: all 0.3s ease; /* Smooth transition for hover effects */
+    box-shadow: 0 4px 8px rgba(0, 255, 0, 0.2); /* Soft green shadow */
+  }
+  
+  .btn-option-no {
+    background: linear-gradient(145deg, #ff7a7a, #e55c5c); /* Soft red gradient */
+    border: none;
+    padding: 12px 25px;
+    cursor: pointer;
+    border-radius: 25px; /* Rounded corners */
+    font-size: 16px;
+    font-weight: bold;
+    transition: all 0.3s ease; /* Smooth transition for hover effects */
+    box-shadow: 0 4px 8px rgba(255, 0, 0, 0.2); /* Soft red shadow */
+  }
+  
+  /* Hover effect to scale and brighten */
+  .btn-option-yes:hover {
+    background: linear-gradient(145deg, #6dbf84, #4f9e61);
+    transform: scale(1.01); /* Scale up the button */
+    box-shadow: 0 8px 16px rgba(0, 255, 0, 0.3); /* Larger shadow on hover */
+  }
+  
+  .btn-option-no:hover {
+    background: linear-gradient(145deg, #ff7a7a, #e55c5c);
+    transform: scale(1.01); /* Scale up the button */
+    box-shadow: 0 8px 16px rgba(255, 0, 0, 0.3); /* Larger shadow on hover */
+  }
+  
+  /* Hover effect for all buttons (adding brightness effect) */
+  button:hover {
+    background-color: #45a049;
+    transform: scale(1.05); /* Slightly scale the button */
+  }
+  
+  .error-message,
+  .success-message {
+      margin: 15px 0;
+      padding: 10px;
+      border-radius: 5px;
+      text-align: center;
+  }
+  
+  .login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  
+  .login-form {
+    background: #ffffff;
+    padding: 20px 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 300px;
+    text-align: center;
+  }
+  
+  .brand-title {
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+    color: #333;
+    font-weight: bold;
+  }
+  
+  .login-form h2 {
+    margin-bottom: 20px;
+    font-size: 24px;
+    color: #333;
+  }
+  
+  .form-group {
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    text-align: left;
+    margin-bottom: 1rem;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: #555;
+  }
+  
+  .form-group input {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+  }
+  
+  .form-group input:focus {
+    outline: none;
+    border-color: #4176f6;
+    box-shadow: 0 0 4px rgba(0, 123, 255, 0.5);
+  }
+  
+  .login-button {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    background-color: #4176f6;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .login-button:hover {
+    background-color: #0056b3;
+  }
+  
+  .btn-primary {
+    height: 56px;
+    border-radius: 5px;
+    border: none;
+    outline: none;
+    color: #fff;
+    font-weight: 500;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: 0.3s ease;
+    width: 100%;
+    padding: 0.7rem;
+    font-size: 1rem;
+    background-color: #4176f6;
+    transform: scale(1.025);
+    margin-bottom: 10px;
+  }
+  
+  .btn-margin-top{
+    margin-top: 10px;
+  }
+  
+  .btn-margin-bottom{
+    margin-bottom: 20px;
+  }
+  
+  .btn-primary:hover {
+    background-color: #4954d0;
+  }
+  
+  .error {
+    color: red;
+    font-size: 0.9rem;
+    margin-top: 0.3rem;
+  }
+  
+  .success-message {
+    background-color: #d4edda;
+    color: #155724;
+    font-size: 16px;
+    margin-top: 10px;
+  }
+  
+  .error-message {
+    background-color: #f8d7da;
+    color: #721c24;
+    font-size: 14px;
+    margin-top: 10px;
+  }
+  
+  .server-error {
+    color: red;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  
+  .create-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f4f4f4;
+  }
+  
+  .card {
+    display: flex;
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+  }
+  
+  .favicon-image {
+    width: 150px; /* You can adjust the size of the logo */
+    height: 150px;
+    margin-bottom: 20px; /* Space between the logo and the title */
+    display: block; /* Ensures image is block-level for better centering */
+    margin-left: auto;
+    margin-right: auto; /* Horizontally center the image */
+  }
+  
+  .homepage-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+  
+  /* Navbar Styles */
+  .navbar {
+    width: 100%;
+    color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #282c34;
+    color: white;
+    width: 100%;
+  }
+  
+  .navbar-links {
+    display: flex;
+    gap: 20px;
+  }
+  
+  .navbar-links a {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: bold;
+    padding-top: 8px;
+  }
+  
+  .navbar-links a:hover {
+    text-decoration: underline;
+  }
+  
+  .logout-button {
+    background-color: #ff4d4d;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    margin-left: auto;
+    align-items: center;
+  }
+  
+  .logout-button:hover {
+    background-color: #e04343;
+    transform: scale(1.05);
+  }
+  
+  .logout-button:focus {
+    outline: none;
+  }
+  
+  .calendar-container {
+    background-color: white;
+    width: 100%;
+    max-width: 600px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    text-align: center;
+  }
+  
+  .calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .nav-button {
+    background-color: #4176f6;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .nav-button:hover {
+    background-color: #0056b3;
+  }
+  
+  .month-year {
+    font-size: 18px;
+    font-weight: bold;
+  }
+  
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .calendar-day {
+    position: relative;
+    padding: 10px;
+    text-align: center;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .calendar-day:hover {
+    background-color: #f4f4f4;
+  }
+  
+  .task-count-circle {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background-color: red;
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+    line-height: 25px;
+    margin-top: 5px;
+  }
+  
+  .task-name {
+    font-size: 12px;
+    margin: 2px 0;
+  }
+  
+  .day-number {
+    font-size: 14px;
+    font-weight: bold;
+  }
+  
+  /* Media query for smaller viewports */
+  @media (max-width: 768px) {
+    .calendar-day {
+      height: 60px;
+    }
+  
+    .task-name {
+      display: none;
+    }
+  }
+  
+  .selected {
+    background-color: #4176f6;
+    color: white;
+  }
+  
+  /* Task Input Styles */
+  .task-input-container {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 10px;
+  }
+  
+  .task-input-container input {
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    width: 70%;
+  }
+  
+  .task-input-container button {
+    padding: 8px 12px;
+    background-color: #4176f6;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .task-input-container button:hover {
+    background-color: #0056b3;
+  }
+  
+  .task-list {
+    margin-top: 20px;
+    text-align: left;
+    padding: 0;
+  }
+  
+  .task-item {
+    background-color: #f1f1f1;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 5px;
+    font-size: 14px;
+  }
+  
+  @media (max-width: 600px) {
+    .calendar-grid {
+      grid-template-columns: repeat(7, 1fr);
+    }
+  
+    .task-input-container input {
+      width: 60%;
+    }
+  }
+  
+  .days-of-week {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+    margin-bottom: 10px;
+    font-weight: bold;
+    color: #555;
+  }
+  
+  .header-day {
+    padding: 10px;
+    text-align: center;
+    background-color: #f4f4f4;
+    border-radius: 4px;
+  }
+  
+  /* Styling for Calendar Days (Add to existing .calendar-day styles) */
+  .calendar-day {
+    padding: 15px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .calendar-day:hover {
+    background-color: #f4f4f4;
+  }
+  
+  .selected {
+    background-color: #4176f6;
+    color: white;
+  }
+  
+  .selected:hover {
+    color: white;
+    background-color: #0056b3;
+  }
+  
+  .logout-page-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background: linear-gradient(to bottom, #3b5998, #547bbd);
+    /* Blue gradient */
+    color: #fff;
+    text-align: center;
+    font-family: 'Arial', sans-serif;
+    opacity: 0;
+    /* Initially hidden */
+    animation: fadeInOut 3s forwards;
+    /* Trigger fade-in-out animation */
+  }
+  
+  /* Card styles */
+  .logout-message {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 400px;
+  }
+  
+  .logout-message h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .logout-message p {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+  }
+  
+  .fade-in-out {
+    animation: fadeInOut 5s ease-in-out forwards;
+  }
+  
+  @keyframes fadeInOut {
+    0% {
+      opacity: 0;
+    }
+  
+    10% {
+      opacity: 1;
+    }
+  
+    90% {
+      opacity: 1;
+    }
+  
+    100% {
+      opacity: 0;
+    }
+  }
+  
+  .countdown {
+    font-weight: bold;
+    color: #ffc107;
+    /* Golden hue */
+    font-size: 1.2rem;
+  }
+  
+  .dropdown-container {
+    position: relative;
+    width: 100%;
+  }
+  
+  .dropdown {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+    background-color: white;
+    text-align: left;
+    cursor: pointer;
+    position: relative;
+  }
+  
+  /* The dropdown options */
+  .dropdown-options {
+    display: none;
+    /* Hide by default */
+    visibility: hidden;
+    pointer-events: none;
+    animation: none;
+    position: absolute;
+    width: 100%;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-top: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    max-height: 200px;
+    overflow-y: auto;
+    border-radius: 4px;
+    z-index: 10;
+  
+  }
+  
+  .dropdown-options.open {
+    display: block;
+    visibility: visible;
+    /* Make the dropdown visible when open */
+    pointer-events: auto;
+    animation: slideDown 0.5s ease-out forwards;
+  }
+  
+  .dropdown-options.closed {
+    display: block;
+    visibility: hidden;
+    /* Hide the dropdown when closed */
+    pointer-events: none;
+    animation: slideUp 0.5s ease-out forwards;
+  }
+  
+  
+  /* Slide-up animation when option is selected */
+  @keyframes slideDown {
+    from {
+      transform: translateY(-10px);
+      opacity: 0;
+    }
+  
+    to {
+      transform: translateY(0px);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes slideUp {
+    from {
+      transform: translateY(10px);
+      opacity: 1;
+    }
+  
+    to {
+      transform: translateY(0);
+      opacity: 0;
+    }
+  }
+  
+  /* Dropdown item */
+  .dropdown-item {
+    padding: 10px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .dropdown-item:hover {
+    background-color: #f4f4f4;
+  }
+  
+  .selected-option {
+    background-color: #4176f6;
+    color: white;
+  }
+  
+  .dropdown:focus {
+    border-color: #4176f6;
+    box-shadow: 0 0 4px rgba(13, 130, 255, 0.5);
+  }
+  
+  .form-container {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .success-container {
+    text-align: center;
+    margin-top: 50px;
+  }
+  
+  .success-message {
+    background-color: #f4f4f4;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  .recovery-message {
+    font-size: 24px;
+    font-weight: bold;
+    color: #4CAF50;
+  }
+  
+  .brand-name {
+    font-size: 28px;
+    color: #FF5733;
+    font-weight: bold;
+  }
+  
+  button.brand-name {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  button.brand-name:hover {
+    background-color: #45a049;
+  }
+  
+  .brand-name span{
+    font-weight: bold;
+    color: #ffc107;
+    /* Golden hue */
+  }
+  
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+  
+  * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Montserrat", sans-serif;
+  }
+  
+  body {
+      width: 100%;
+      min-height: 100vh;
+      padding: 0 10px;
+      display: flex;
+      background: #4176f6;
+      justify-content: center;
+      align-items: center;
+  }
+  
+  /* Login form styling */
+  .login_form {
+      width: 100%;
+      max-width: 435px;
+      background: #fff;
+      border-radius: 6px;
+      padding: 41px 30px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+  }
+  
+  .login_form h2 {
+      font-size: 25px;
+      text-align: center;
+  }
+  
+  /* Google & Apple button styling */
+  
+  .login_form .login_option {
+      display: flex;
+      width: 100%;
+      justify-content: space-between;
+      align-items: center;
+  }
+  
+  .login_form .login_option .option {
+      width: calc(100% / 2 - 12px);
+  }
+  
+  .login_form .login_option .option a {
+      height: 56px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      background: #F8F8FB;
+      border: 1px solid #DADAF2;
+      border-radius: 5px;
+      margin: 34px 0 24px 0;
+      text-decoration: none;
+      color: #171645;
+      font-weight: 500;
+      transition: 0.2s ease;
+  }
+  
+  .login_form .login_option .option a:hover {
+      background: #ededf5;
+      border-color: #4176f6;
+  }
+  
+  .login_form .login_option .option a img {
+      max-width: 25px;
+  }
+  
+  .login_form p {
+      text-align: center;
+      font-weight: 500;
+  }
+  
+  .login_form .separator span {
+      background: #fff;
+      z-index: 1;
+      padding: 0 10px;
+      position: relative;
+  }
+  
+  .login_form .separator::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      top: 50%;
+      left: 0;
+      height: 1px;
+      background: #C2C2C2;
+      display: block;
+  }
+  
+  form .input_box label {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 8px;
+  }
+  
+  /* Input field styling */
+  form .input_box input {
+      width: 100%;
+      height: 57px;
+      border: 1px solid #DADAF2;
+      border-radius: 5px;
+      outline: none;
+      background: #F8F8FB;
+      font-size: 17px;
+      padding: 0px 20px;
+      margin-bottom: 25px;
+      transition: 0.2s ease;
+  }
+  
+  form .input_box input:focus {
+      border-color: #4176f6;
+  }
+  
+  form .input_box .password_title {
+      display: flex;
+      justify-content: space-between;
+      text-align: center;
+  }
+  
+  form .input_box {
+      position: relative;
+  }
+  
+  form button:hover {
+      background: #4954d0;
+  }
+  
+  .login-link {
+    cursor: pointer;
+    text-decoration: none;
+      color: #626cd6;
+      font-weight: 500;
+  }
+  
+  .login-link:hover {
+    text-decoration: underline;
+  }

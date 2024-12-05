@@ -6,7 +6,6 @@
     <title>WorkConnect</title>
     <link rel="icon" type="image/x-icon" href="./images/favicon.png">
     <link rel="stylesheet" href="styles.css">
-    <script src="script.js"></script>
 </head>
 <body>
 <header>
@@ -22,7 +21,7 @@
 <main>
     <div class="calendar-container">
         <h2>Calendar</h2>
-        <div class="task-input" id="taskInputContainer">
+        <div class="task-input" id="taskInputContainer" style="display:none;">
             <input type="text" placeholder="Add task" id="taskInput">
             <button onclick="addTask()">Add Task</button>
         </div>
@@ -92,5 +91,6 @@
 <footer>
     <p>&copy; 2024 WorkConnect. All rights reserved.</p>
 </footer>
+<script src="script.js"></script>
 </body>
 </html>

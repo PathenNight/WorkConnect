@@ -7,21 +7,36 @@ const dotenv = require('dotenv');
 const fs = require('fs');
 const path = require('path');
 const https = require('https');
+const helmet = require('helmet');
+const compression = require('compression');
+const cors = require('cors');
+const bodyParser = require('body-parser');
+const authRoutes = require('./routes/auth');  // Import the auth routes
 
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 3000; // Default to HTTPS port
-const useHttps = process.env.USE_HTTPS === 'true';
-let refreshTokens = [];
+const port = process.env.PORT || 3000; // Default port
+const useHttps = process.env.USE_HTTPS === 'true';  // Use HTTPS based on environment variable
+const refreshTokens = new Set(); // Secure set for refresh tokens
 const saltRounds = 10;
 
-// Middleware
-app.use(express.json()); // for parsing application/json
-app.use(express.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
+// Validate critical environment variables
+if (!process.env.SECRET_KEY || !process.env.DB_HOST) {
+    console.error('Error: Missing required environment variables. Check your .env file.');
+    process.exit(1); // Exit if necessary environment variables are missing
+}
 
-// Middleware to serve static files
-app.use(express.static(path.join(__dirname, 'Frontend')));
+// Middleware
+app.use(helmet()); // Adds security headers
+app.use(compression()); // Compresses responses
+app.use(express.json()); // Parses JSON request bodies
+app.use(express.urlencoded({ extended: true })); // Parses URL-encoded request bodies
+app.use(express.static(path.join(__dirname, 'Frontend'))); // Serves static files (Frontend)
+app.use(cors({
+    origin: 'http://localhost:3000', // React dev server
+    credentials: true, // Allow cookies if necessary for auth
+}));
 
 // Database connection setup
 const createConnection = require('./config/db');
@@ -30,11 +45,11 @@ const createConnection = require('./config/db');
 (async () => {
     try {
         const setupDatabase = require('./config/setupDatabase');
-        await setupDatabase(); // Ensures tables are created
+        await setupDatabase(); // Ensures tables are created if needed
         console.log('Database setup complete.');
     } catch (error) {
-        console.error('Failed to set up the database:', error.message);
-        process.exit(1); // Exit process if the database setup fails
+        console.error('Database setup failed:', error.stack);
+        process.exit(1); // Exit if database setup fails
     }
 })();
 
@@ -42,8 +57,8 @@ const createConnection = require('./config/db');
 if (useHttps) {
     try {
         const httpsOptions = {
-            key: fs.readFileSync(path.join(__dirname, 'certificates', 'server.key')), // SSL key path
-            cert: fs.readFileSync(path.join(__dirname, 'certificates', 'server.cert')) // SSL cert path
+            key: fs.readFileSync(path.join(__dirname, 'certificates', 'server.key')), // SSL key
+            cert: fs.readFileSync(path.join(__dirname, 'certificates', 'server.cert')), // SSL certificate
         };
 
         const httpsServer = https.createServer(httpsOptions, app);
@@ -63,18 +78,18 @@ if (useHttps) {
     });
 }
 
-// Import and use routes
-const authRoutes = require('./routes/auth');
+// Import and use other routes (password, message, calendar)
 const passwordRoutes = require('./routes/password');
 const messageRoutes = require('./routes/message');
 const calendarRoutes = require('./routes/calendar');
 
-app.use('/auth', authRoutes);
-app.use('/auth/password', passwordRoutes);
-app.use('/auth/messages', messageRoutes);
-app.use('/auth/calendar', calendarRoutes);
+// Use consistent API prefixes for routes
+app.use('/api/auth', authRoutes);
+app.use('/api/auth/password', passwordRoutes);
+app.use('/api/messages', messageRoutes);
+app.use('/api/calendar', calendarRoutes);
 
-// Root route for server verification
+// Root route for server verification (works if accessing / directly)
 app.get('/', (req, res) => {
     res.send('Welcome to the WorkConnect backend!');
 });
@@ -85,7 +100,7 @@ app.use((err, req, res, next) => {
     res.status(500).json({ message: 'Internal server error' });
 });
 
-// Graceful shutdown handling
+// Graceful shutdown handling for SIGINT (Ctrl+C)
 process.on('SIGINT', () => {
     console.log('Shutting down server...');
     process.exit(0);

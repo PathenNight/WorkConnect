@@ -70,8 +70,80 @@ const resetPassword = async (req, res) => {
     }
 };
 
+// Recovery by Key
+const recoverByKey = async (req, res) => {
+    const { recoveryKey } = req.body;
+    const connection = await createConnection();
+
+    try {
+        const [user] = await connection.query('SELECT * FROM Users WHERE recoveryKey = ?', [recoveryKey]);
+        if (user.length === 0) {
+            return res.status(404).json({ found: false });
+        }
+
+        // Return email (you may want to return a masked password or other info)
+        res.json({ found: true, email: user[0].email });
+    } catch (error) {
+        console.error("Error recovering by key:", error);
+        res.status(500).json({ message: 'Error recovering account.' });
+    } finally {
+        await connection.end();
+    }
+};
+
+// Recovery by Email
+const recoverByEmail = async (req, res) => {
+    const { email } = req.body;
+    const connection = await createConnection();
+
+    try {
+        const [user] = await connection.query('SELECT * FROM Users WHERE email = ?', [email]);
+        if (user.length === 0) {
+            return res.status(404).json({ found: false });
+        }
+
+        // Send the security question (this would need to be part of your Users table)
+        res.json({ found: true, securityQuestion: user[0].securityQuestion });
+    } catch (error) {
+        console.error("Error recovering by email:", error);
+        res.status(500).json({ message: 'Error recovering account.' });
+    } finally {
+        await connection.end();
+    }
+};
+
+// Verify Security Question Answer
+const verifyAnswer = async (req, res) => {
+    const { email, answer } = req.body;
+    const connection = await createConnection();
+
+    try {
+        const [user] = await connection.query('SELECT * FROM Users WHERE email = ?', [email]);
+        if (user.length === 0) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Hash the input answer and compare with the stored hashed answer
+        const isAnswerCorrect = await bcrypt.compare(answer, user[0].securityAnswer);
+        if (isAnswerCorrect) {
+            res.json({ correct: true });
+        } else {
+            res.status(400).json({ correct: false });
+        }
+    } catch (error) {
+        console.error("Error verifying answer:", error);
+        res.status(500).json({ message: 'Error verifying answer.' });
+    } finally {
+        await connection.end();
+    }
+};
+
+
 module.exports = {
     forgotPassword,
-    resetPassword
+    resetPassword,
+    recoverByKey,   // Ensure recoverByKey is exported
+    recoverByEmail, // Ensure recoverByEmail is exported
+    verifyAnswer
 };
 
