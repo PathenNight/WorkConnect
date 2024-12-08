@@ -59,6 +59,18 @@ function CreateUser() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (validateForm()) {
+
+            try {
+                const response = await axios.post('http://localhost:8080/get/validate-email', { Email: Email });
+                if (response.data.isValid) {
+                    setErrors({});
+                } else {
+                    setErrors({ Email: "This email is already in use." });
+                }
+            } catch (error) {
+                console.error("Email validation failed:", error);
+                setErrors({ Email: "Unable to validate email at the moment. Please try again later." });
+            }
             axios
                 .post("http://localhost:8080/create/user", {
                     Username,

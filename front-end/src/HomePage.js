@@ -6,11 +6,11 @@ const HomePage = () => {
     const { userID } = useParams();
     const navigate = useNavigate();
     const [selectedDate, setSelectedDate] = useState(null);
-    const [taskInput, setTaskInput] = useState('');
+    const [taskName, setTaskName] = useState('');
+    const [taskDescription, setTaskDescription] = useState('');
     const [taskList, setTaskList] = useState({});
     const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
     const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
-    const [errorMessage, setErrorMessage] = useState('');
 
     const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
     const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
@@ -43,33 +43,33 @@ const HomePage = () => {
     };
 
     const handleAddTask = async () => {
-        if (!taskInput.trim()) {
-            setErrorMessage('Please enter a task before adding it.'); // Set error message
-            return; // Don't proceed if the input is empty
-        }
-
-        if (selectedDate) {
+        
+        if (taskName.trim() && selectedDate) {
             try {
                 const formattedDate = new Date(currentYear, currentMonth, selectedDate)
                     .toISOString()
                     .split('T')[0];
+                    
 
-                const response = await fetch('http://localhost:8080/api/tasks', {
+                const response = await fetch('http://localhost:8080/post/tasks', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
                         userId: userID,
-                        taskName: taskInput,
+                        taskName: taskName,
+                        taskDescription: taskDescription,
                         taskDate: formattedDate,
                     }),
                 });
+                console.log("hit!");
 
                 const data = await response.json();
                 if (response.ok) {
-                    setTaskInput('');
-                    setErrorMessage(''); // Clear error message on success
+                    setTaskName('');
+                    setTaskDescription('');
+                    console.log("OK!");
                     fetchTasks();
                 } else {
                     console.error('Error adding task:', data);
@@ -78,13 +78,14 @@ const HomePage = () => {
                 console.error('Error:', error);
             }
         }
+        console.log("hit2");
     };
 
-    
     const fetchTasks = async () => {
         try {
-            const response = await fetch(`http://localhost:8080/api/tasks/${userID}`);
+            const response = await fetch(`http://localhost:8080/get/tasks/${userID}`);
             const data = await response.json();
+            console.log(data);
             if (response.ok) {
                 // Organize tasks by date
                 const tasksByDate = data.tasks.reduce((acc, task) => {
@@ -92,7 +93,7 @@ const HomePage = () => {
                     const taskDay = taskDate.getDate();
                     const taskMonth = taskDate.getMonth();
                     const taskYear = taskDate.getFullYear();
-                    
+
                     if (taskMonth === currentMonth && taskYear === currentYear) {
                         if (!acc[taskDay]) {
                             acc[taskDay] = [];
@@ -135,11 +136,18 @@ const HomePage = () => {
     };
 
     useEffect(() => {
-        setTaskInput('');
+        console.log('Fetching tasks for:', currentMonth, currentYear);
+        setTaskName('');
+        setTaskDescription('');
         setSelectedDate(null);
-        setErrorMessage('');
         fetchTasks();
-    }, [currentMonth, currentYear]);
+    }, [currentMonth, currentYear]); // Triggers on month/year change
+    
+    // Optional: Call fetchTasks on component mount (if needed)
+    useEffect(() => {
+        console.log('Component mounted, fetching tasks...');
+        fetchTasks();
+    }, []);
 
     return (
         <div className="homepage-container">
@@ -167,7 +175,7 @@ const HomePage = () => {
                     ))}
                 </div>
                 <div className="calendar-grid">
-                {generateCalendar().map((day, index) => {
+                    {generateCalendar().map((day, index) => {
                         if (day) {
                             const taskCount = taskList[day] ? taskList[day].length : 0;
                             const hasTasks = taskList[day] && taskList[day].length > 0;
@@ -179,9 +187,9 @@ const HomePage = () => {
                                     className={`calendar-day ${isSelected ? 'selected' : ''}`}
                                     onClick={() => handleDateClick(day)}
                                     style={{
-                                        backgroundColor: hasTasks ? '#4CAF50' : '',
+                                        backgroundColor: hasTasks ? '#4CAF50' : '',  // Green if there are tasks
                                         color: isSelected ? 'white' : '',
-                                        borderColor: isSelected ? '#1976D2' : ''  // Blue border for selected
+                                        borderColor: isSelected ? '#1976D2' : ''
                                     }}
                                 >
                                     <div className="day-number">{day}</div>
@@ -199,14 +207,19 @@ const HomePage = () => {
                     <div className="task-input-container">
                         <input
                             type="text"
-                            value={taskInput}
-                            onChange={(e) => setTaskInput(e.target.value)}
-                            placeholder="Add task"
+                            value={taskName}
+                            onChange={(e) => setTaskName(e.target.value)}
+                            placeholder="Add task name"
                         />
-                        <button className="btn-primary" onClick={handleAddTask}>Add Task</button>
+                        <input
+                            type="text"
+                            value={taskDescription}
+                            onChange={(e) => setTaskDescription(e.target.value)}
+                            placeholder="Describe task"
+                        />
+                        <button className='btn-primary' onClick={handleAddTask}>Add Task</button>
                     </div>
                 )}
-                {errorMessage && <div className="error-message">{errorMessage}</div>}
 
                 <div className="task-list">
                     {selectedDate && taskList[selectedDate] && taskList[selectedDate].map((task, idx) => (

@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import "./styles.css";
 
 const LoginPage = () => {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const [errors, setErrors] = useState({});
@@ -14,7 +14,10 @@ const LoginPage = () => {
     navigate('/');
   }
   const navigateSignUp = () => {
-    navigate('/create');
+    navigate('/register/user');
+  }
+  const navigateCompanyRegister = () => {
+    navigate('/register/company');
   }
 
   const navigateForgot = () => {
@@ -23,14 +26,11 @@ const LoginPage = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!email) {
-      newErrors.email = "Email is required.";
-    } else if (!emailRegex.test(email)) {
-      newErrors.email = "Please enter a valid email address.";
+
+    if (!username) {
+      newErrors.username = "Username is required.";
     }
-  
+
     if (!password) {
       newErrors.password = "Password is required.";
     }
@@ -43,13 +43,15 @@ const LoginPage = () => {
     e.preventDefault();
     if (validateForm()) { // Call validateForm as a function
       try {
-        const response = await axios.post("http://localhost:8080/login", {
-          Email: email,
+        
+        const response = await axios.post("http://localhost:8080/get/login", {
+          Username: username,
           Password: password,
         });
+
         const user = response.data.user;
-        // Navigate to the user's home page
-        navigate(`/home/${user.ID}`);
+        console.log(user.userId);
+        navigate(`/home/${user.userId}`);
       } catch (err) {
         if (err.response && err.response.data.error) {
           setError(err.response.data.error);
@@ -75,16 +77,16 @@ const LoginPage = () => {
           {error && <div className="error-message">{error}</div>}
 
           <div className="input_box">
-            <label htmlFor="email">Email</label>
+            <label htmlFor="username">User Name</label>
             <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
+              type="text"
+              id="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Enter your username"
               maxLength={50}
             />
-            {errors.email && <span className="error">{errors.email}</span>}
+            {errors.username && <span className="error">{errors.username}</span>}
           </div>
 
           <div className="input_box">
@@ -106,7 +108,8 @@ const LoginPage = () => {
 
           <button type="submit" className='btn-primary btn-margin-bottom'>Log In</button>
 
-          <p className="sign_up">Don't have an account? <a className="login-link" onClick={navigateSignUp}>Sign up</a></p>
+          <p className="sign_up">Need an account? <a className="login-link" onClick={navigateSignUp}>Sign up</a></p>
+          <p className="sign_up">Need to register your company? <a className="login-link" onClick={navigateCompanyRegister}>Register here</a></p>
         </form>
       </div>
     </>

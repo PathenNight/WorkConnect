@@ -9,7 +9,7 @@
     "jsonwebtoken": "^9.0.2",
     "mkdir": "^0.0.2",
     "mysql": "^2.18.1",
-    "mysql2": "^3.11.3",
+    "mysql2": "^3.11.5",
     "nodemailer": "^6.9.15",
     "nodemon": "^3.1.7"
   }

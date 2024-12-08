@@ -8,7 +8,7 @@ const app = express();
 let db;
 
 app.use(express.json());
-app.use(cors());
+app.use(cors({origin: 'http://localhost:3000'}));
 app.use(bodyParser.json());
 
 
@@ -56,8 +56,7 @@ app.post("/create/user", async (req, res) => {
         !SecurityAnswer2 || !SecurityQuestion3 || !SecurityAnswer3) {
         return res.status(400).json({ error: "All fields are required." });
     }
-    /*
-    const checkCompanyNameSQL = "SELECT * FROM companies WHERE name = ?";
+    const checkCompanyNameSQL = "SELECT * FROM companies WHERE companyName = ?";
     db.query(checkCompanyNameSQL, [CompanyName], (err, data) => {
         if (err) {
             console.error("Error checking company name:", err);
@@ -67,7 +66,6 @@ app.post("/create/user", async (req, res) => {
         if (data.length !== 1) {
             return res.status(400).json({ error: "Company not found or duplicate company." });
         }
-            */
         
         bcrypt.hash(Password, 10, (err, hashedPassword) => {
             if (err) {
@@ -102,19 +100,184 @@ app.post("/create/user", async (req, res) => {
             });
         });
     });
+});
+
+app.post('/create/company', async (req, res) => {
+    const {
+        Username,
+        Firstname,
+        Lastname,
+        Email,
+        Password,
+        SecurityQuestion1,
+        SecurityAnswer1,
+        SecurityQuestion2,
+        SecurityAnswer2,
+        SecurityQuestion3,
+        SecurityAnswer3,
+        CompanyName,
+        CompanyIndustry,
+        CompanyAddress
+    } = req.body;
+
+    // Check required fields
+    if (!Email || !Username || !Password || !Firstname || !Lastname || !CompanyName || !CompanyIndustry || !CompanyAddress) {
+        return res.status(400).json({ message: 'All required fields must be filled.' });
+    }
+
+    try {
+        // Check if email already exists in the users table
+        const [existingUser] = await db.execute('SELECT * FROM users WHERE email = ?', [Email]);
+
+        if (existingUser.length > 0) {
+            return res.status(400).json({ message: 'Email is already in use.' });
+        }
+
+        // Insert the company into the companies table
+        const [companyResult] = await db.query(
+            'INSERT INTO companies (companyName, companyIndustry, companyAddress, companyAdminEmail) VALUES (?, ?, ?, ?)',
+            [CompanyName, CompanyIndustry, CompanyAddress, Email]
+        );
+
+        if (companyResult.affectedRows === 0) {
+            return res.status(500).json({ message: 'Failed to create company.' });
+        }
+
+        // Hash the password before storing
+        const hashedPassword = await bcrypt.hash(Password, 10);
+
+        // Insert the user into the users table
+        const [userResult] = await db.query(
+            `INSERT INTO users (
+                username, password, firstname, lastname, email, companyName, role, roleId, is_active, 
+                securityQuestion1, securityAnswer1, securityQuestion2, securityAnswer2, securityQuestion3, securityAnswer3
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+                Username,
+                hashedPassword,
+                Firstname,
+                Lastname,
+                Email,
+                CompanyName,
+                'Admin',
+                1,
+                true,
+                SecurityQuestion1,
+                SecurityAnswer1,
+                SecurityQuestion2,
+                SecurityAnswer2,
+                SecurityQuestion3,
+                SecurityAnswer3
+            ]
+        );
+
+        if (userResult.affectedRows === 0) {
+            return res.status(500).json({ message: 'Failed to create user.' });
+        }
+
+        return res.status(201).json({ message: 'Company and user created successfully!' });
+    } catch (error) {
+        console.error('Error creating company and user:', error);
+        return res.status(500).json({ message: 'Internal server error.' });
+    }
+});
 
 
+app.post('/create/tasks', async (req, res) => {
+    const { userId, description, name, taskdate } = req.body;
 
-app.post('/create/tasks', (req, res) => {
-    const { userId, taskName, taskDate } = req.body;
-
-    if (!userId || !taskName || !taskDate) {
+    if (!userId || !description || !name || !taskdate) {
         return res.status(400).json({ message: 'Missing required fields' });
     }
 
-    const query = 'INSERT INTO calendarTasks (taskDescription, taskDate, userID) VALUES (?, ?, ?)';
+    const query = 'INSERT INTO tasks (name, description, taskdate, userId) VALUES (?, ?, ?, ?)';
+    
+    try {
+        
+        const [result] = await db.query(query, [name, description, taskdate, userId]);
+        
+        res.status(200).json({
+            message: 'Task added successfully',
+            taskId: result.insertId,
+        });
+    } catch (err) {
+        console.error('Error inserting task:', err);
+        res.status(500).json({ message: 'Error adding task to the database' });
+    }
+});
 
-    db.query(query, [taskName, taskDate, userId], (err, result) => {
+
+//Get routes
+app.post('/get/validate-email', async (req, res) => {
+    const { Email } = req.body;
+
+    if (!Email) {
+        return res.status(400).json({ isValid: false, message: 'Email is required.' });
+    }
+
+    try {
+        // Define the query directly here
+        const query = 'SELECT COUNT(*) AS count FROM users WHERE email = ?';
+        
+        // Run the query
+        const [rows] = await db.query(query, [Email]);
+
+        // After logging, access the result based on its structure
+        if (rows[0].count > 0) {
+            return res.status(200).json({ isValid: false, message: 'Email is already in use.' });
+        }
+
+        return res.status(200).json({ isValid: true });
+    } catch (error) {
+        console.error('Error validating email:', error);
+        return res.status(500).json({ isValid: false, message: 'Internal server error.' });
+    }
+});
+
+
+
+app.post('/get/login', async (req, res) => {
+    const { Username, Password } = req.body; // assuming email and password are being sent in the request body
+
+    if (!Username || !Password) {
+        return res.status(400).json({ error: "Username and password are required" });
+    }
+
+    try {
+        // Retrieve the user by email
+        const [rows] = await db.query('SELECT * FROM users WHERE username = ?', [Username]);
+
+        if (rows.length === 0) {
+            return res.status(401).json({ error: "Invalid username or password" });
+        }
+
+        const user = rows[0]; // Assuming the first row is the correct user
+
+        // Compare the provided password with the hashed password in the database
+        const match = await bcrypt.compare(Password, user.password);
+
+        if (!match) {
+            return res.status(401).json({ error: "Invalid username or password" });
+        }
+
+        // If the password matches, proceed with login logic (e.g., generating a JWT)
+        res.status(200).json({ message: "Login successful", user: user });
+    } catch (err) {
+        console.error("Error during login:", err);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+
+app.post('/post/tasks', (req, res) => {
+    const { userId, taskName, taskDescription, taskDate } = req.body;
+
+    if (!userId || !taskName || !taskDescription || !taskDate) {
+        return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    const query = 'INSERT INTO tasks (name, description, taskDate, userId) VALUES (?, ?, ?, ?)';
+
+    db.query(query, [taskName,taskDescription, taskDate, userId], (err, result) => {
         if (err) {
             console.error('Error inserting task:', err);
             return res.status(500).json({ message: 'Error adding task to the database' });
@@ -127,59 +290,27 @@ app.post('/create/tasks', (req, res) => {
     });
 });
 
-
-//Get routes
-app.post("/get/login", (req, res) => {
-    const { Username, Password } = req.body;
-    if (!Username || !Password) {
-        return res.status(400).json({ error: "Username and Password are required." });
-    }
-
-    const sql = "SELECT * FROM users WHERE username = ?";
-    db.query(sql, [Username], (err, data) => {
-        if (err) {
-            console.error("Database error:", err);
-            return res.status(500).json({ error: "Database error." });
-        }
-
-        if (data.length === 0) {
-            return res.status(401).json({ error: "Invalid username or password." });
-        }
-
-        // Compare the hashed password
-        bcrypt.compare(Password, data[0].Password, (err, isMatch) => {
-            if (err) {
-                console.error("Error comparing passwords:", err);
-                return res.status(500).json({ error: "Error verifying password." });
-            }
-
-            if (!isMatch) {
-                return res.status(401).json({ error: "Invalid Username or password." });
-            }
-
-            return res.status(200).json({ user: data[0] });
-        });
-    });
-});
-
-app.get('/tasks/:userID', (req, res) => {
+app.get('/get/tasks/:userID', async (req, res) => {
     const userID = req.params.userID;
 
     // Query to fetch tasks for the given userId
-    const sql = 'SELECT * FROM calendarTasks WHERE userID = ?';
-    db.query(sql, [userID], (err, result) => {
-        if (err) {
-            console.error('Error fetching tasks:', err);
-            return res.status(500).json({ message: 'Error fetching tasks from the database' });
-        }
+    const sql = 'SELECT * FROM tasks WHERE userId = ?';
 
-        res.status(200).json({ tasks: result });
-    });
+    try {
+        // Await the query using the mysql2 promise interface
+        const [rows] = await db.query(sql, [userID]);
+
+        res.status(200).json({ tasks: rows });
+
+    } catch (err) {
+        console.error('Error fetching tasks:', err);
+        res.status(500).json({ message: 'Error fetching tasks from the database' });
+    }
 });
 
+
 // Route to get user data based on userID
-app.get('/api/users/:userID', (req, res) => {
-    console.log(`Fetching user with ID: ${req.params.userID}`);
+app.get('/get/users/:userID', (req, res) => {
     const userID = req.params.userID;
 
     const sql = 'SELECT Name, Email, OrganizationName, securityQuestion, securityAnswer, recoveryKey FROM user WHERE ID = ?';

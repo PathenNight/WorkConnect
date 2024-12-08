@@ -492,7 +492,6 @@ button:hover {
   align-items: center;
   justify-content: center;
   height: 100vh;
-  background: linear-gradient(to bottom, #3b5998, #547bbd);
   /* Blue gradient */
   color: #fff;
   text-align: center;
@@ -925,4 +924,7 @@ form button:hover {
   background: linear-gradient(145deg, #6dbf84, #4f9e61);
   transform: scale(1.02);
   box-shadow: 0 8px 16px rgba(0, 255, 0, 0.3);
+}
+.btn-bottom-padding{
+  padding-bottom: 20px;
 }

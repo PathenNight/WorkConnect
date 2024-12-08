@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const SecurityQuestionDropdown = ({ onQuestionSelect }) => {
+const SecurityQuestionDropdown = ({ onQuestionSelect, error }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState('');
 
@@ -34,15 +34,13 @@ const SecurityQuestionDropdown = ({ onQuestionSelect }) => {
       <label htmlFor="securityQuestion">Select a security question below</label>
       <div className="dropdown-container">
         <div
-          className="dropdown"
+          className={`dropdown ${error ? 'error-border' : ''}`} // Add red border for errors
           onClick={toggleDropdown}
-          tabIndex={0} // makes it focusable
+          tabIndex={0} // Makes it focusable
         >
           {selectedOption || "Select a question..."}
         </div>
-        <div
-          className={`dropdown-options ${isOpen ? 'open' : 'closed'}`}
-        >
+        <div className={`dropdown-options ${isOpen ? 'open' : 'closed'}`}>
           {questions.map((question, index) => (
             <div
               key={index}
@@ -54,6 +52,7 @@ const SecurityQuestionDropdown = ({ onQuestionSelect }) => {
           ))}
         </div>
       </div>
+      {error && <span className="error">{error}</span>}
     </div>
   );
 };
