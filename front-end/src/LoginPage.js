@@ -7,6 +7,7 @@ const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
+  const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
   const navigateHome = () => {
@@ -20,21 +21,41 @@ const LoginPage = () => {
     navigate('/forgot');
   }
 
+  const validateForm = () => {
+    const newErrors = {};
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email) {
+      newErrors.email = "Email is required.";
+    } else if (!emailRegex.test(email)) {
+      newErrors.email = "Please enter a valid email address.";
+    }
+  
+    if (!password) {
+      newErrors.password = "Password is required.";
+    }
+  
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0; // Return true if no errors
+  };
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const response = await axios.post("http://localhost:8080/login", {
-        Email: email,
-        Password: password,
-      });
-      const user = response.data.user;
-      // Navigate to the user's home page
-      navigate(`/home/${user.ID}`);
-    } catch (err) {
-      if (err.response && err.response.data.error) {
-        setError(err.response.data.error);
-      } else {
-        setError("An unexpected error occurred. Please try again.");
+    if (validateForm()) { // Call validateForm as a function
+      try {
+        const response = await axios.post("http://localhost:8080/login", {
+          Email: email,
+          Password: password,
+        });
+        const user = response.data.user;
+        // Navigate to the user's home page
+        navigate(`/home/${user.ID}`);
+      } catch (err) {
+        if (err.response && err.response.data.error) {
+          setError(err.response.data.error);
+        } else {
+          setError("An unexpected error occurred. Please try again.");
+        }
       }
     }
   };
@@ -53,23 +74,39 @@ const LoginPage = () => {
           <h2>Log in</h2>
           {error && <div className="error-message">{error}</div>}
 
-          <div class="input_box">
-            <label for="email">Email</label>
-            <input type="email" id="email" placeholder="Enter email address" required />
+          <div className="input_box">
+            <label htmlFor="email">Email</label>
+            <input
+              type="email"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email"
+              maxLength={50}
+            />
+            {errors.email && <span className="error">{errors.email}</span>}
           </div>
 
-          <div class="input_box">
-            <div class="password_title">
-              <label for="password">Password</label>
+          <div className="input_box">
+            <div className="password_title">
+              <label htmlFor="password">Password</label>
               <a className="login-link" onClick={navigateForgot}>Forgot Password?</a>
             </div>
 
-            <input type="password" id="password" placeholder="Enter your password" required />
+            <input
+              type="password"
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter your password"
+              maxLength={50}
+            />
+            {errors.password && <span className="error">{errors.password}</span>}
           </div>
 
           <button type="submit" className='btn-primary btn-margin-bottom'>Log In</button>
 
-          <p class="sign_up">Don't have an account? <a className="login-link" onClick={navigateSignUp}>Sign up</a></p>
+          <p className="sign_up">Don't have an account? <a className="login-link" onClick={navigateSignUp}>Sign up</a></p>
         </form>
       </div>
     </>

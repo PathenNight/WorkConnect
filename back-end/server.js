@@ -1,89 +1,234 @@
-const express = require('express');
-const mysql = require('mysql2/promise');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const nodemailer = require('nodemailer');
-const dotenv = require('dotenv');
-const fs = require('fs');
+const express = require("express");
+const cors = require("cors");
+const bodyParser = require('body-parser');
+const {createConnection, createTables} = require("./config/connectToDb");
 const path = require('path');
-const https = require('https');
-
-dotenv.config();
-
+const bcrypt = require('bcryptjs');
 const app = express();
-const port = process.env.PORT || 443; // Default to HTTPS port
-const useHttps = process.env.USE_HTTPS === 'true';
-let refreshTokens = [];
-const saltRounds = 10;
+let db;
 
-// Middleware
-app.use(express.json()); // for parsing application/json
-app.use(express.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
+app.use(express.json());
+app.use(cors());
+app.use(bodyParser.json());
 
-// Database connection setup
-const createConnection = require('./config/db');
 
-// Initialize the database and create tables
+/*This is the port that the server should run on. To send data from
+a react component to the back-end, you have to include this port
+number in your axios request. For example, if port number is 8080,
+front-end request to the /login route would look like:
+
+const response = await axios.post("http://localhost:8080/login", {
+          Email: email,
+          Password: password,
+        });
+
+        ^ sends Email and Password to backend /login route.
+*/
+const port = 8080;
+
 (async () => {
+    // Database connection setup
+    db = await createConnection();
+
     try {
-        const setupDatabase = require('./config/setupDatabase');
-        await setupDatabase(); // Ensures tables are created
-        console.log('Database setup complete.');
+        await createTables(db); // Wait for tables to be created
     } catch (error) {
-        console.error('Failed to set up the database:', error.message);
-        process.exit(1); // Exit process if the database setup fails
+        console.error("Error creating tables:", error);
     }
+
+    app.listen(port, () => {
+        console.log("All tables present!")
+        console.log("Server started on port " + port);
+    });
 })();
 
-// HTTPS Server Setup
-if (useHttps) {
-    try {
-        const httpsOptions = {
-            key: fs.readFileSync(path.join(__dirname, 'certificates', 'server.key')), // SSL key path
-            cert: fs.readFileSync(path.join(__dirname, 'certificates', 'server.cert')) // SSL cert path
-        };
 
-        const httpsServer = https.createServer(httpsOptions, app);
+//Create routes
+app.post("/create/user", async (req, res) => {
+    const {
+        Username, Password, Firstname, Lastname, Email,
+        CompanyName, SecurityQuestion1, SecurityAnswer1,
+        SecurityQuestion2, SecurityAnswer2, SecurityQuestion3, SecurityAnswer3
+    } = req.body;
 
-        // Listen on all network interfaces to allow external access
-        httpsServer.listen(port, '0.0.0.0', () => {
-            console.log(`HTTPS server is running on https://localhost:${port}`);
-        });
-    } catch (error) {
-        console.error('Failed to start HTTPS server:', error.message);
-        process.exit(1);
+    if (!Username || !Password || !Firstname || !Lastname || !Email ||
+        !CompanyName || !SecurityQuestion1 || !SecurityAnswer1 || !SecurityQuestion2 ||
+        !SecurityAnswer2 || !SecurityQuestion3 || !SecurityAnswer3) {
+        return res.status(400).json({ error: "All fields are required." });
     }
-} else {
-    // Fallback to HTTP if USE_HTTPS is not enabled
-    app.listen(port, '0.0.0.0', () => {
-        console.log(`HTTP server is running on http://localhost:${port}`);
+    /*
+    const checkCompanyNameSQL = "SELECT * FROM companies WHERE name = ?";
+    db.query(checkCompanyNameSQL, [CompanyName], (err, data) => {
+        if (err) {
+            console.error("Error checking company name:", err);
+            return res.status(500).json({ error: "Error checking company name." });
+        }
+
+        if (data.length !== 1) {
+            return res.status(400).json({ error: "Company not found or duplicate company." });
+        }
+            */
+        
+        bcrypt.hash(Password, 10, (err, hashedPassword) => {
+            if (err) {
+                console.error("Error hashing password:", err);
+                return res.status(500).json({ error: "Error hashing password." });
+            }
+
+            const sql = `
+                INSERT INTO users 
+                (username, password, firstname, lastname, email, companyName, role, roleId, is_active, securityQuestion1, securityAnswer1, securityQuestion2, securityAnswer2, securityQuestion3, securityAnswer3)
+                VALUES (?, ?, ?, ?, ?, ?, 'Employee', '3', true, ?, ?, ?, ?, ?, ?)
+            `;
+            db.query(sql, [
+                Username,
+                hashedPassword,
+                Firstname,
+                Lastname,
+                Email,
+                CompanyName,
+                SecurityQuestion1,
+                SecurityAnswer1,
+                SecurityQuestion2,
+                SecurityAnswer2,
+                SecurityQuestion3,
+                SecurityAnswer3
+            ], (err, result) => {
+                if (err) {
+                    console.error("Database error:", err);
+                    return res.status(500).json({ error: "Database error." });
+                }
+                return res.status(201).json({ result });
+            });
+        });
     });
-}
 
-// Import and use routes
-const authRoutes = require('./routes/auth');
-const passwordRoutes = require('./routes/password');
-const messageRoutes = require('./routes/message');
-const calendarRoutes = require('./routes/calendar');
 
-app.use('/auth', authRoutes);
-app.use('/auth/password', passwordRoutes);
-app.use('/auth/messages', messageRoutes);
-app.use('/auth/calendar', calendarRoutes);
 
-// Root route for server verification
-app.get('/', (req, res) => {
-    res.send('Welcome to the WorkConnect backend!');
+app.post('/create/tasks', (req, res) => {
+    const { userId, taskName, taskDate } = req.body;
+
+    if (!userId || !taskName || !taskDate) {
+        return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    const query = 'INSERT INTO calendarTasks (taskDescription, taskDate, userID) VALUES (?, ?, ?)';
+
+    db.query(query, [taskName, taskDate, userId], (err, result) => {
+        if (err) {
+            console.error('Error inserting task:', err);
+            return res.status(500).json({ message: 'Error adding task to the database' });
+        }
+
+        res.status(200).json({
+            message: 'Task added successfully',
+            taskId: result.insertId, // Return the ID of the newly inserted task
+        });
+    });
 });
 
-// Global error handling middleware
-app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).json({ message: 'Internal server error' });
+
+//Get routes
+app.post("/get/login", (req, res) => {
+    const { Username, Password } = req.body;
+    if (!Username || !Password) {
+        return res.status(400).json({ error: "Username and Password are required." });
+    }
+
+    const sql = "SELECT * FROM users WHERE username = ?";
+    db.query(sql, [Username], (err, data) => {
+        if (err) {
+            console.error("Database error:", err);
+            return res.status(500).json({ error: "Database error." });
+        }
+
+        if (data.length === 0) {
+            return res.status(401).json({ error: "Invalid username or password." });
+        }
+
+        // Compare the hashed password
+        bcrypt.compare(Password, data[0].Password, (err, isMatch) => {
+            if (err) {
+                console.error("Error comparing passwords:", err);
+                return res.status(500).json({ error: "Error verifying password." });
+            }
+
+            if (!isMatch) {
+                return res.status(401).json({ error: "Invalid Username or password." });
+            }
+
+            return res.status(200).json({ user: data[0] });
+        });
+    });
 });
 
-// Graceful shutdown handling
-process.on('SIGINT', () => {
-    console.log('Shutting down server...');
-    process.exit(0);
+app.get('/tasks/:userID', (req, res) => {
+    const userID = req.params.userID;
+
+    // Query to fetch tasks for the given userId
+    const sql = 'SELECT * FROM calendarTasks WHERE userID = ?';
+    db.query(sql, [userID], (err, result) => {
+        if (err) {
+            console.error('Error fetching tasks:', err);
+            return res.status(500).json({ message: 'Error fetching tasks from the database' });
+        }
+
+        res.status(200).json({ tasks: result });
+    });
+});
+
+// Route to get user data based on userID
+app.get('/api/users/:userID', (req, res) => {
+    console.log(`Fetching user with ID: ${req.params.userID}`);
+    const userID = req.params.userID;
+
+    const sql = 'SELECT Name, Email, OrganizationName, securityQuestion, securityAnswer, recoveryKey FROM user WHERE ID = ?';
+    
+    db.query(sql, [userID], (err, data) => {
+        console.log(res.json);
+        if (err) {
+            console.error('Error fetching user data:', err);
+            return res.status(500).json({ error: 'Error fetching user data from the database' });
+        }
+
+        if (data.length === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        res.status(200).json(data[0]);  // Return the first user (since userID is unique)
+    });
+});
+
+//Update routes
+app.put("/update/:id", (req, res) => {
+    const sql = "UPDATE user SET `Name`=?, `Email`=?, `Password`=?, `OrganizationName`=? WHERE ID=?";
+    const { Name, Email, Password, OrganizationName } = req.body;
+    const id = req.params.id;
+
+    if (!Name || !Email || !Password || !OrganizationName) {
+        return res.status(400).json({ error: "Name, Email, Password, and Organization Name are required." });
+    }
+
+    db.query(sql, [Name, Email, Password, OrganizationName, id], (err, result) => {
+        if (err) {
+            console.error("Database error:", err);
+            return res.status(500).json({ error: "Database error." });
+        }
+        return res.status(200).json({ result });
+    });
+});
+
+
+//Delete routes
+app.delete("/user/:id", (req, res) => {
+    const sql = "DELETE FROM user WHERE ID=?";
+    const id = req.params.id;
+
+    db.query(sql, [id], (err, result) => {
+        if (err) {
+            console.error("Database error:", err);
+            return res.status(500).json({ error: "Database error." });
+        }
+        return res.status(200).json({ result });
+    });
 });

@@ -317,14 +317,25 @@ button:hover {
   background-color: #4176f6;
   color: white;
   border: none;
-  padding: 8px 12px;
   cursor: pointer;
   border-radius: 4px;
-  transition: background-color 0.3s ease;
+  width: 50px;
+  height: 50px;
+  font-size: 18px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.3s ease-in-out;
+  padding: 0;
 }
 
 .nav-button:hover {
-  background-color: #0056b3;
+  background-color: #4954d0;
+  transform: scale(1.05);
+}
+
+.nav-button:focus {
+  outline: none;
 }
 
 .month-year {
@@ -394,9 +405,14 @@ button:hover {
 /* Task Input Styles */
 .task-input-container {
   display: flex;
-  gap: 10px;
+  gap: 20px;
   justify-content: center;
   margin-top: 10px;
+}
+
+.task-input-container button{
+  width: 150px;
+  height: 50px;
 }
 
 .task-input-container input {
@@ -404,20 +420,8 @@ button:hover {
   border-radius: 4px;
   border: 1px solid #ccc;
   width: 70%;
-}
-
-.task-input-container button {
-  padding: 8px 12px;
-  background-color: #4176f6;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.task-input-container button:hover {
-  background-color: #0056b3;
+  margin-bottom: 10px;
+  margin-top: -2px;
 }
 
 .task-list {
@@ -843,4 +847,82 @@ form button:hover {
 
 .login-link:hover {
   text-decoration: underline;
+}
+
+.profile-page-container {
+  max-width: 800px;
+  margin: auto;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.profile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.profile-title {
+  font-size: 24px;
+  color: #333;
+}
+
+.profile-card {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+}
+
+.profile-image-container {
+  flex-shrink: 0;
+}
+
+.profile-image {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.profile-details {
+  flex-grow: 1;
+}
+
+.profile-detail {
+  margin-bottom: 15px;
+}
+
+.profile-detail label {
+  font-weight: bold;
+  color: #555;
+}
+
+.profile-detail p {
+  font-size: 16px;
+  color: #333;
+}
+
+.profile-detail input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.btn-option-yes {
+  background: linear-gradient(145deg, #6dbf84, #4f9e61);
+  padding: 12px 25px;
+  border-radius: 25px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.btn-option-yes:hover {
+  background: linear-gradient(145deg, #6dbf84, #4f9e61);
+  transform: scale(1.02);
+  box-shadow: 0 8px 16px rgba(0, 255, 0, 0.3);
 }

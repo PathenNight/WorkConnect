@@ -1,5 +1,4 @@
-const createConnection = require('../config/db'); // Ensure your DB config is reusable
-
+/*
 // Send a message (POST)
 exports.sendMessage = async (req, res) => {
     const { senderID, recipientID, messageContents } = req.body;
@@ -9,7 +8,6 @@ exports.sendMessage = async (req, res) => {
     }
 
     try {
-        const db = await createConnection(); 
         const [result] = await db.query(
             "INSERT INTO Messages (senderID, recipientID, messageContents) VALUES (?, ?, ?)",
             [senderID, recipientID, messageContents]
@@ -34,7 +32,6 @@ exports.getMessages = async (req, res) => {
     }
 
     try {
-        const db = await createConnection(); // Create a connection to the database
         console.log(`Fetching messages for recipientID: ${recipientID}`);
         const [messages] = await db.query(
             "SELECT * FROM Messages WHERE recipientID = ?",
@@ -54,3 +51,4 @@ exports.getMessages = async (req, res) => {
     }
 };
 
+*/

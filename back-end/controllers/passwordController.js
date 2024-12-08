@@ -1,7 +1,7 @@
+/*
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
-const bcrypt = require('bcrypt'); // Add bcrypt import
-const createConnection = require('../config/db');
+const bcrypt = require('bcrypt');
 
 // Set up Nodemailer
 const transporter = nodemailer.createTransport({
@@ -15,7 +15,6 @@ const transporter = nodemailer.createTransport({
 // Request password reset logic
 const forgotPassword = async (req, res) => {
     const { email } = req.body;
-    const connection = await createConnection();
 
     try {
         const [user] = await connection.query('SELECT * FROM Users WHERE email = ?', [email]);
@@ -50,7 +49,6 @@ const forgotPassword = async (req, res) => {
 // Reset password logic
 const resetPassword = async (req, res) => {
     const { token, newPassword } = req.body;
-    const connection = await createConnection();
 
     try {
         const hashedToken = crypto.createHash('sha256').update(token).digest('hex'); // Hash the token for verification
@@ -75,3 +73,4 @@ module.exports = {
     resetPassword
 };
 
+*/

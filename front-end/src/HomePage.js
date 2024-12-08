@@ -10,6 +10,7 @@ const HomePage = () => {
     const [taskList, setTaskList] = useState({});
     const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
     const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
+    const [errorMessage, setErrorMessage] = useState('');
 
     const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
     const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
@@ -42,12 +43,16 @@ const HomePage = () => {
     };
 
     const handleAddTask = async () => {
-        if (taskInput.trim() && selectedDate) {
-            try {
+        if (!taskInput.trim()) {
+            setErrorMessage('Please enter a task before adding it.'); // Set error message
+            return; // Don't proceed if the input is empty
+        }
 
+        if (selectedDate) {
+            try {
                 const formattedDate = new Date(currentYear, currentMonth, selectedDate)
-                .toISOString()
-                .split('T')[0];
+                    .toISOString()
+                    .split('T')[0];
 
                 const response = await fetch('http://localhost:8080/api/tasks', {
                     method: 'POST',
@@ -60,10 +65,11 @@ const HomePage = () => {
                         taskDate: formattedDate,
                     }),
                 });
-    
+
                 const data = await response.json();
                 if (response.ok) {
                     setTaskInput('');
+                    setErrorMessage(''); // Clear error message on success
                     fetchTasks();
                 } else {
                     console.error('Error adding task:', data);
@@ -131,6 +137,7 @@ const HomePage = () => {
     useEffect(() => {
         setTaskInput('');
         setSelectedDate(null);
+        setErrorMessage('');
         fetchTasks();
     }, [currentMonth, currentYear]);
 
@@ -196,9 +203,10 @@ const HomePage = () => {
                             onChange={(e) => setTaskInput(e.target.value)}
                             placeholder="Add task"
                         />
-                        <button onClick={handleAddTask}>Add Task</button>
+                        <button className="btn-primary" onClick={handleAddTask}>Add Task</button>
                     </div>
                 )}
+                {errorMessage && <div className="error-message">{errorMessage}</div>}
 
                 <div className="task-list">
                     {selectedDate && taskList[selectedDate] && taskList[selectedDate].map((task, idx) => (
