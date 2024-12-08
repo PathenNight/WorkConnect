@@ -136,8 +136,10 @@ const HomePage = () => {
     };
 
     const navigateConversation = () => {
-        navigate('/conversation');
-      }    
+        navigate('/conversation/', {
+            state: { userId: userID}
+        });
+    }   
 
     useEffect(() => {
         console.log('Fetching tasks for:', currentMonth, currentYear);
@@ -158,7 +160,7 @@ const HomePage = () => {
             <nav className="navbar">
                 <div className="navbar-links">
                     <a href="#profile">Profile</a>
-                    <p className="conversationLink">Messages <a className="conversationLink" onClick={navigateConversation}>Conversation</a></p>
+                    <p className="conversationLink"><a className="conversationLink" onClick={navigateConversation}>Conversation</a></p>
                     <a href="#notifications">Notifications</a>
                     <button className="logout-button" onClick={handleLogout}>Logout</button>
                 </div>

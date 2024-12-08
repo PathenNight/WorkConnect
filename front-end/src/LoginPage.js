@@ -38,7 +38,7 @@ const LoginPage = () => {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0; // Return true if no errors
   };
-  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (validateForm()) { // Call validateForm as a function

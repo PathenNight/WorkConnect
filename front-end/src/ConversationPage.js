@@ -1,4 +1,5 @@
 import axios from "axios";
+import { useLocation } from 'react-router-dom'
 import { useNavigate, useParams } from "react-router-dom";
 import "./ConversationStyles.css";
 
@@ -16,7 +17,21 @@ function ConversationPage() {
       
       const navigateConversation = () => {
         navigate('/conversation/');
+        //state: { userId: userID}
       }
+/** TODO: Figure this out
+    const fetchUsername = async () => {
+        try {
+            const response = await fetch(`http://localhost:8080/get/users/${userId}`);
+            const data = await response.json();
+            console.log(data);
+            const user = response.data.user;
+            username1 = user.username;
+        } catch (error) {
+            console.error('Error retrieveing username:', error);
+        }
+    }
+    */
 
     const submitEvent = (event) => {
         event.preventDefault(); // Prevents the form from refreshing the page
@@ -46,7 +61,7 @@ function ConversationPage() {
         <nav className="navbar">
                 <div className="navbar-links">
                     <a href="#profile">Profile</a>
-                    <p className="conversationLink">Messages <a className="conversationLink" onClick={navigateConversation}>Conversation</a></p>
+                    <p className="conversationLink"><a className="conversationLink" onClick={navigateConversation}>Conversation</a></p>
                     <a href="#notifications">Notifications</a>
                 </div>
             </nav>
