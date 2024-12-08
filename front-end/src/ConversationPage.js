@@ -6,12 +6,11 @@ import "./ConversationStyles.css";
 import React, { useState } from 'react';
 //TODO: Fix search
 function ConversationPage() {
-    const [username1, setusername1] = useState('');
-    const [username2, setusername2] = useState('');
     const [conversations, setConversations] = useState([]);
     const navigate = useNavigate();
     const location = useLocation(); 
     const { userId } = location.state || {};
+    const [username2, setUsername2] = useState("");
 
     const navigateHome = () => {
         navigate('/');
@@ -21,33 +20,31 @@ function ConversationPage() {
         navigate('/conversation/', { state: { userId: userId } });
       };
       
-/** TODO: Figure this out
     const fetchUsername = async () => {
         try {
             const response = await fetch(`http://localhost:8080/get/users/${userId}`);
             const data = await response.json();
             console.log(data);
             const user = response.data.user;
-            username1 = user.username;
+            username2 = user.username;
         } catch (error) {
-            console.error('Error retrieveing username:', error);
+            console.error('Error retrieving username:', error);
         }
     }
-    */
 
-    const submitEvent = (event) => {
-        event.preventDefault(); // Prevents the form from refreshing the page
-
-        // Check if the message is not empty
-        if (username2.trim() !== '') {
-        // Add the message to the chat box
-        addConversation(username2);
-        // Clear the input field after sending
-        setusername2('');
-        } else {
-        alert('Please type a username before submitting!');
+    const handleInputChange = (event) => {
+        setUsername2(event.target.value);
+      };
+    
+      const handleSubmit = (event) => {
+        event.preventDefault();
+        if (username2.trim() === "") {
+          alert("Please type a username before searching.");
+          return;
         }
-    };
+        console.log("Searching for username:", username2);
+        //TODO: Search for if username2 exists. If it does, display it.
+      };
 
     const addConversation = (username2) => {
         setConversations((prevConversations) => [...prevConversations, username2]);
