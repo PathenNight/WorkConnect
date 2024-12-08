@@ -10,15 +10,17 @@ function ConversationPage() {
     const [username2, setusername2] = useState('');
     const [conversations, setConversations] = useState([]);
     const navigate = useNavigate();
+    const location = useLocation(); 
+    const { userId } = location.state || {};
 
     const navigateHome = () => {
         navigate('/');
       }
       
       const navigateConversation = () => {
-        navigate('/conversation/');
-        //state: { userId: userID}
-      }
+        navigate('/conversation/', { state: { userId: userId } });
+      };
+      
 /** TODO: Figure this out
     const fetchUsername = async () => {
         try {
