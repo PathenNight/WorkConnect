@@ -135,6 +135,10 @@ const HomePage = () => {
         navigate('/logout');
     };
 
+    const navigateConversation = () => {
+        navigate('/conversation');
+      }    
+
     useEffect(() => {
         console.log('Fetching tasks for:', currentMonth, currentYear);
         setTaskName('');
@@ -154,7 +158,7 @@ const HomePage = () => {
             <nav className="navbar">
                 <div className="navbar-links">
                     <a href="#profile">Profile</a>
-                    <a href="#messages">Messages</a>
+                    <p className="conversationLink">Messages <a className="conversationLink" onClick={navigateConversation}>Conversation</a></p>
                     <a href="#notifications">Notifications</a>
                     <button className="logout-button" onClick={handleLogout}>Logout</button>
                 </div>

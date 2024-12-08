@@ -7,6 +7,7 @@ import LogoutPage from './LogoutPage';
 import RecoveryPage from './RecoveryPage';
 import ProfilePage from "./ProfilePage";
 import CreateCompany from './CreateCompany';
+import ConversationPage from './ConversationPage';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
           <Route path="/logout" element={<LogoutPage />}></Route>
           <Route path="/forgot" element={<RecoveryPage />}></Route>
           <Route path="/profile/:userID" element={<ProfilePage />}></Route>
+          <Route path="/conversation" element={<ConversationPage />}></Route>
         </Routes>
       </BrowserRouter>
     </div>

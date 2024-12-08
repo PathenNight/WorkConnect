@@ -43,20 +43,18 @@ const LoginPage = () => {
     e.preventDefault();
     if (validateForm()) { // Call validateForm as a function
       try {
-        
         const response = await axios.post("http://localhost:8080/get/login", {
           Username: username,
           Password: password,
         });
 
         const user = response.data.user;
-        console.log(user.userId);
         navigate(`/home/${user.userId}`);
       } catch (err) {
         if (err.response && err.response.data.error) {
           setError(err.response.data.error);
         } else {
-          setError("An unexpected error occurred. Please try again.");
+          setError("An unexpected error occurred. Please try again." + err);
         }
       }
     }
@@ -74,7 +72,7 @@ const LoginPage = () => {
             onClick={navigateHome}
           />
           <h2>Log in</h2>
-          {error && <div className="error-message">{error}</div>}
+          {error && <div className="error-message">{error + username + password}</div>}
 
           <div className="input_box">
             <label htmlFor="username">User Name</label>
