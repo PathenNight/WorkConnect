@@ -1,71 +1,36 @@
-// models/calendar.js
+const pool = require('../config/db'); // Database connection
+
 class Calendar {
-  constructor() {
-    this.activities = [];
-  }
-
-  createActivity(name, startMonth, startDay, startYear, endMonth, endDay, endYear) {
-    const startDate = new Date(startYear, startMonth - 1, startDay);
-    const endDate = new Date(endYear, endMonth - 1, endDay);
-    const activity = new Activity(name, startDate, endDate);
-    this.activities.push(activity);
-  }
-
-  displayCalendar(year, month) {
-    this.printMonth(year, month);
-    this.printActivitiesInMonth(year, month);
-  }
-
-  displayCalendarYear(year) {
-    for (let month = 1; month <= 12; month++) {
-      this.displayCalendar(year, month);
+    // Add a new event
+    static async addEvent(eventName, eventDate, eventDescription) {
+        const sql = `
+            INSERT INTO Calendar (event_name, event_date, event_description)
+            VALUES (?, ?, ?)
+        `;
+        await pool.query(sql, [eventName, eventDate, eventDescription]);
     }
-  }
 
-  printMonth(year, month) {
-    const date = new Date(year, month - 1, 1);
-    const numberOfDaysInMonth = new Date(year, month, 0).getDate();
-    const startDay = date.getDay();
-
-    console.log(`\n ${date.toLocaleString('default', { month: 'long' })} ${year}`);
-    console.log('Su Mo Tu We Th Fr Sa');
-
-    let space = '   '.repeat(startDay);
-    process.stdout.write(space);
-
-    for (let day = 1; day <= numberOfDaysInMonth; day++) {
-      process.stdout.write(`${String(day).padStart(2, ' ')} `);
-      if ((day + startDay) % 7 === 0) {
-        console.log();
-      }
+    // Get all events for a specific month
+    static async getEventsByMonth(year, month) {
+        const sql = `
+            SELECT * FROM Calendar
+            WHERE YEAR(event_date) = ? AND MONTH(event_date) = ?
+            ORDER BY event_date ASC
+        `;
+        const [rows] = await pool.query(sql, [year, month]);
+        return rows;
     }
-    console.log();
-  }
 
-  printActivitiesInMonth(year, month) {
-    const activitiesInMonth = this.getActivitiesInMonth(year, month);
-    console.log(`\nTasks and Projects for ${new Date(year, month - 1).toLocaleString('default', { month: 'long' })}:`);
-    activitiesInMonth.forEach(activity => {
-      console.log(` - ${activity.name} | Starting Date: ${activity.activityStart.toDateString()} | Deadline: ${activity.deadline.toDateString()}`);
-    });
-  }
-
-  getActivitiesInMonth(year, month) {
-    return this.activities.filter(activity => {
-      const startDate = activity.activityStart;
-      const endDate = activity.deadline;
-      return (startDate.getFullYear() === year && startDate.getMonth() + 1 === month) ||
-             (endDate.getFullYear() === year && endDate.getMonth() + 1 === month);
-    });
-  }
-}
-
-class Activity {
-  constructor(name, activityStart, deadline) {
-    this.name = name;
-    this.activityStart = activityStart;
-    this.deadline = deadline;
-  }
+    // Get all events for a specific day
+    static async getEventsByDay(year, month, day) {
+        const sql = `
+            SELECT * FROM Calendar
+            WHERE event_date = ?
+        `;
+        const date = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+        const [rows] = await pool.query(sql, [date]);
+        return rows;
+    }
 }
 
 module.exports = Calendar;

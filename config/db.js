@@ -1,21 +1,15 @@
 const mysql = require('mysql2/promise');
 
-// Function to create a database connection
-async function createConnection() {
-    try {
-        const connection = await mysql.createConnection({
-            host: '127.0.0.1',         // Database host (use localhost or IP)
-            user: 'root',       // Database username
-            password: 'password',      // Database password
-            database: 'WorkConnectDB', // Database name
-        });
-        console.log('Database connection established successfully.');
-        return connection;
-    } catch (err) {
-        console.error('Error connecting to the database:', err);
-        throw err;
-    }
-}
+// Create a connection pool
+const pool = mysql.createPool({
+    host: process.env.DB_HOST || '127.0.0.1',   // Use environment variables for flexibility
+    user: process.env.DB_USER || 'root',       // Database username
+    password: process.env.DB_PASSWORD || 'password', // Database password
+    database: process.env.DB_NAME || 'WorkConnectDB', // Database name
+    waitForConnections: true,                  // Wait for available connection before throwing an error
+    connectionLimit: 10,                       // Maximum number of connections in the pool
+    queueLimit: 0                              // No limit on queued connection requests
+});
 
-// Export the createConnection function for use in other files
-module.exports = createConnection;
+// Export the pool for use in other files
+module.exports = pool;
