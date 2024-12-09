@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import './styles.css';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const HomePage = () => {
     const { userID } = useParams();
@@ -12,6 +13,37 @@ const HomePage = () => {
     const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
     const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
     const [showAddTaskPopup, setShowAddTaskPopup] = useState(false);
+    const genAI = new GoogleGenerativeAI(
+        "AIzaSyBBzbyohUBzUtaYCZQ21b8Rg_Zp92sZVwE"
+    );
+    const [inputValue, setInputValue] = useState("");
+    const [promptResponses, setpromptResponses] = useState([]);
+
+    const getResponseForGivenPrompt = async () => {
+        try {
+            const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+            const result = await model.generateContent(inputValue);
+            const response = await result.response;
+            const text = await response.text();
+            setpromptResponses([
+                ...promptResponses,
+                text
+            ]);
+            setTimeout(() => {
+                setpromptResponses((prevResponses) => prevResponses.filter((_, i) => i !== 0));
+            }, 60000);
+        }
+        catch (error) {
+            console.log("Something went wrong.");
+        }
+    };
+
+
+    const handleInputChange = (e) => {
+        setInputValue(e.target.value);
+
+    };
+
 
     const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
     const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
@@ -127,87 +159,103 @@ const HomePage = () => {
 
     return (
         <div className="homepage-container">
+
             <nav className="navbar">
                 <div className="navbar-links">
                     <button onClick={() => navigate(`/profile/${userID}`)}>Profile</button>
                     <button className="logout-button" onClick={() => navigate('/logout')}>Logout</button>
                 </div>
             </nav>
+            
+                <div className="calendar-container">
+                    <div className="calendar-header">
+                        <button className="nav-button" onClick={() => changeMonth(-1)}>
+                            {"<"}
+                        </button>
 
-            <div className="calendar-container">
-                <div className="calendar-header">
-                    <button className="nav-button" onClick={() => changeMonth(-1)}>
-                        {"<"}
-                    </button>
-                    <span className="month-year">
-                        {new Date(currentYear, currentMonth).toLocaleString('default', { month: 'long' })} {currentYear}
-                    </span>
-                    <button className="nav-button" onClick={() => changeMonth(1)}>
-                        {">"}
-                    </button>
-                </div>
+                        <span className="month-year">
+                            {new Date(currentYear, currentMonth).toLocaleString('default', { month: 'long' })} {currentYear}
+                        </span>
+                        <button className="nav-button" onClick={() => changeMonth(1)}>
+                            {">"}
+                        </button>
+                    </div>
 
-                <div className="calendar-grid">
-                    {generateCalendar().map((day, index) => {
-                        if (!day) {
-                            return <div key={index} className="calendar-day"></div>;
-                        }
+                    <div className="calendar-grid">
+                        {generateCalendar().map((day, index) => {
+                            if (!day) {
+                                return <div key={index} className="calendar-day"></div>;
+                            }
 
-                        const hasTasks = taskList[day] && taskList[day].length > 0;
+                            const hasTasks = taskList[day] && taskList[day].length > 0;
 
-                        return (
-                            <div
-                                key={index}
-                                className={`calendar-day ${day === selectedDate ? 'selected' : ''}`}
-                                onClick={() => setSelectedDate(day)}
-                                style={{ backgroundColor: hasTasks ? '#4CAF50' : '' }}
-                            >
-                                {day}
-                            </div>
-                        );
-                    })}
-                </div>
-            </div>
-
-            {selectedDate && (
-                <div className="task-list-container">
-                    <h3>Tasks for {selectedDate}</h3>
-                    <button className="add-task-button" onClick={() => setShowAddTaskPopup(true)}>Add Task</button>
-                    {taskList[selectedDate]?.length > 0 ? (
-                        taskList[selectedDate].map((task, index) => (
-                            <div key={index} className="task-item">
-                                <p><strong>Task Name:</strong> {task.taskName}</p>
-                                <p><strong>Description:</strong> {task.taskDescription}</p>
-                            </div>
-                        ))
-                    ) : (
-                        <p>No tasks for this date.</p>
-                    )}
-                </div>
-            )}
-
-            {showAddTaskPopup && (
-                <div className="add-task-popup">
-                    <div className="popup-card">
-                        <button className="close-button" onClick={() => setShowAddTaskPopup(false)}>X</button>
-                        <h3>Add New Task</h3>
-                        <input
-                            type="text"
-                            placeholder="Task Name"
-                            value={taskName}
-                            onChange={(e) => setTaskName(e.target.value)}
-                        />
-                        <textarea
-                            placeholder="Task Description"
-                            value={taskDescription}
-                            onChange={(e) => setTaskDescription(e.target.value)}
-                        />
-                        <button className="submit-button" onClick={handleAddTask}>Submit</button>
+                            return (
+                                <div
+                                    key={index}
+                                    className={`calendar-day ${day === selectedDate ? 'selected' : ''}`}
+                                    onClick={() => setSelectedDate(day)}
+                                    style={{ backgroundColor: hasTasks ? '#4CAF50' : '' }}
+                                >
+                                    {day}
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
-            )}
-        </div>
-    );
+                <input
+                type="text"
+                value={inputValue}
+                onChange={handleInputChange}
+                placeholder='Ask Gemini for recommendations'
+                className='input-field'
+            />
+            <button className="send-button" onClick={getResponseForGivenPrompt}>Send</button>
+            <div className="prompt-responses">
+                {promptResponses.map((promptResponse, index) => (
+                    <div key={index} className="prompt-response">
+                        {promptResponse}
+                    </div>
+                ))}
+                </div>
+                {selectedDate && (
+                    <div className="task-list-container">
+                        <h3>Tasks for {selectedDate}</h3>
+                        <button className="add-task-button" onClick={() => setShowAddTaskPopup(true)}>Add Task</button>
+                        {taskList[selectedDate]?.length > 0 ? (
+                            taskList[selectedDate].map((task, index) => (
+                                <div key={index} className="task-item">
+                                    <p><strong>Task Name:</strong> {task.taskName}</p>
+                                    <p><strong>Description:</strong> {task.taskDescription}</p>
+                                </div>
+                            ))
+                        ) : (
+                            <p>No tasks for this date.</p>
+                        )}
+                    </div>
+                )}
+
+                {showAddTaskPopup && (
+                    <div className="add-task-popup">
+                        <div className="popup-card">
+                            <button className="close-button" onClick={() => setShowAddTaskPopup(false)}>X</button>
+                            <h3>Add New Task</h3>
+                            <input
+                                type="text"
+                                placeholder="Task Name"
+                                value={taskName}
+                                onChange={(e) => setTaskName(e.target.value)}
+                            />
+                            <textarea
+                                placeholder="Task Description"
+                                value={taskDescription}
+                                onChange={(e) => setTaskDescription(e.target.value)}
+                            />
+                            <button className="submit-button" onClick={handleAddTask}>Submit</button>
+                        </div>
+                    </div>
+                )}
+            </div>
+            );
 };
 
-export default HomePage;
+            export default HomePage;
