@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
+import { useAuth } from "./AuthContext";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "./styles.css";
@@ -9,6 +10,8 @@ const LoginPage = () => {
   const [error, setError] = useState(null);
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
+
+  const { login } = useAuth();
 
   const navigateHome = () => {
     navigate('/');
@@ -54,7 +57,7 @@ const LoginPage = () => {
         });
 
         const user = response.data.user;
-        console.log(user.userId);
+        login(user);
         navigate(`/home/${user.userId}`);
       } catch (err) {
         if (err.response && err.response.data.error) {

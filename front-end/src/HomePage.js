@@ -130,7 +130,6 @@ const HomePage = () => {
             <nav className="navbar">
                 <div className="navbar-links">
                     <button onClick={() => navigate(`/profile/${userID}`)}>Profile</button>
-                    <button onClick={() => navigate(`/messages/${userID}`)}>Messages</button>
                     <button className="logout-button" onClick={() => navigate('/logout')}>Logout</button>
                 </div>
             </nav>
