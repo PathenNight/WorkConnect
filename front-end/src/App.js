@@ -7,6 +7,7 @@ import LogoutPage from './LogoutPage';
 import RecoveryPage from './RecoveryPage';
 import ProfilePage from "./ProfilePage";
 import CreateCompany from './CreateCompany';
+import UserRecoveryPage from './UserRecoveryPage';
 
 function App() {
   return (
@@ -18,7 +19,8 @@ function App() {
           <Route path="/register/user" element={<CreateUser />}></Route>
           <Route path="/register/company" element={<CreateCompany />}></Route>
           <Route path="/logout" element={<LogoutPage />}></Route>
-          <Route path="/forgot" element={<RecoveryPage />}></Route>
+          <Route path="/forgot/password" element={<RecoveryPage />}></Route>
+          <Route path="/forgot/username" element={<UserRecoveryPage />}></Route>
           <Route path="/profile/:userID" element={<ProfilePage />}></Route>
         </Routes>
       </BrowserRouter>

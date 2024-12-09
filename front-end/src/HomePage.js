@@ -11,85 +11,19 @@ const HomePage = () => {
     const [taskList, setTaskList] = useState({});
     const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
     const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
+    const [showAddTaskPopup, setShowAddTaskPopup] = useState(false);
 
     const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
     const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
-
-    const generateCalendar = () => {
-        let calendar = [];
-        let dayCount = 1;
-
-        for (let i = 0; i < firstDayOfMonth; i++) {
-            calendar.push(null);
-        }
-
-        for (let i = firstDayOfMonth; i < 7; i++) {
-            calendar.push(dayCount++);
-        }
-
-        while (dayCount <= daysInMonth) {
-            for (let i = 0; i < 7; i++) {
-                if (dayCount <= daysInMonth) {
-                    calendar.push(dayCount++);
-                }
-            }
-        }
-
-        return calendar;
-    };
-
-    const handleDateClick = (day) => {
-        setSelectedDate(day);
-    };
-
-    const handleAddTask = async () => {
-        
-        if (taskName.trim() && selectedDate) {
-            try {
-                const formattedDate = new Date(currentYear, currentMonth, selectedDate)
-                    .toISOString()
-                    .split('T')[0];
-                    
-
-                const response = await fetch('http://localhost:8080/post/tasks', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        userId: userID,
-                        taskName: taskName,
-                        taskDescription: taskDescription,
-                        taskDate: formattedDate,
-                    }),
-                });
-                console.log("hit!");
-
-                const data = await response.json();
-                if (response.ok) {
-                    setTaskName('');
-                    setTaskDescription('');
-                    console.log("OK!");
-                    fetchTasks();
-                } else {
-                    console.error('Error adding task:', data);
-                }
-            } catch (error) {
-                console.error('Error:', error);
-            }
-        }
-        console.log("hit2");
-    };
 
     const fetchTasks = async () => {
         try {
             const response = await fetch(`http://localhost:8080/get/tasks/${userID}`);
             const data = await response.json();
-            console.log(data);
+
             if (response.ok) {
-                // Organize tasks by date
                 const tasksByDate = data.tasks.reduce((acc, task) => {
-                    const taskDate = new Date(task.taskDate);
+                    const taskDate = new Date(task.taskdate);
                     const taskDay = taskDate.getDate();
                     const taskMonth = taskDate.getMonth();
                     const taskYear = taskDate.getFullYear();
@@ -98,7 +32,11 @@ const HomePage = () => {
                         if (!acc[taskDay]) {
                             acc[taskDay] = [];
                         }
-                        acc[taskDay].push(task.taskDescription);
+                        acc[taskDay].push({
+                            taskName: task.name,
+                            taskDescription: task.description,
+                            userId: task.userId,
+                        });
                     }
                     return acc;
                 }, {});
@@ -112,40 +50,78 @@ const HomePage = () => {
         }
     };
 
-    const handlePreviousMonth = () => {
-        if (currentMonth === 0) {
-            setCurrentMonth(11);
-            setCurrentYear(currentYear - 1);
-        } else {
-            setCurrentMonth(currentMonth - 1);
+    const handleAddTask = async () => {
+        if (taskName.trim() && selectedDate) {
+            try {
+                const formattedDate = new Date(currentYear, currentMonth, selectedDate)
+                    .toISOString()
+                    .split('T')[0];
+
+                const response = await fetch('http://localhost:8080/create/task', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        userId: userID,
+                        taskName: taskName,
+                        taskDescription: taskDescription,
+                        taskdate: formattedDate,
+                    }),
+                });
+
+                if (response.ok) {
+                    setTaskName('');
+                    setTaskDescription('');
+                    setShowAddTaskPopup(false);
+                    fetchTasks();
+                } else {
+                    console.error('Error adding task:', await response.json());
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
         }
     };
 
-    const handleNextMonth = () => {
-        if (currentMonth === 11) {
-            setCurrentMonth(0);
-            setCurrentYear(currentYear + 1);
-        } else {
-            setCurrentMonth(currentMonth + 1);
+    const generateCalendar = () => {
+        const calendar = [];
+        let dayCount = 1;
+
+        for (let i = 0; i < firstDayOfMonth; i++) {
+            calendar.push(null);
         }
+
+        while (dayCount <= daysInMonth) {
+            calendar.push(dayCount++);
+        }
+
+        return calendar;
     };
 
-    const handleLogout = () => {
-        sessionStorage.removeItem('userID');
-        navigate('/logout');
+    const changeMonth = (direction) => {
+        setCurrentMonth((prev) => {
+            let newMonth = prev + direction;
+            let newYear = currentYear;
+
+            if (newMonth < 0) {
+                newMonth = 11;
+                newYear -= 1;
+            } else if (newMonth > 11) {
+                newMonth = 0;
+                newYear += 1;
+            }
+
+            setCurrentYear(newYear); // Update the year
+            return newMonth;
+        });
     };
 
     useEffect(() => {
-        console.log('Fetching tasks for:', currentMonth, currentYear);
-        setTaskName('');
-        setTaskDescription('');
-        setSelectedDate(null);
         fetchTasks();
-    }, [currentMonth, currentYear]); // Triggers on month/year change
-    
-    // Optional: Call fetchTasks on component mount (if needed)
+    }, [currentMonth, currentYear]);
+
     useEffect(() => {
-        console.log('Component mounted, fetching tasks...');
         fetchTasks();
     }, []);
 
@@ -153,80 +129,84 @@ const HomePage = () => {
         <div className="homepage-container">
             <nav className="navbar">
                 <div className="navbar-links">
-                    <a href="#profile">Profile</a>
-                    <a href="#messages">Messages</a>
-                    <a href="#notifications">Notifications</a>
-                    <button className="logout-button" onClick={handleLogout}>Logout</button>
+                    <button onClick={() => navigate(`/profile/${userID}`)}>Profile</button>
+                    <button onClick={() => navigate(`/messages/${userID}`)}>Messages</button>
+                    <button className="logout-button" onClick={() => navigate('/logout')}>Logout</button>
                 </div>
             </nav>
 
             <div className="calendar-container">
                 <div className="calendar-header">
-                    <button className="nav-button" onClick={handlePreviousMonth}>{"<"}</button>
-                    <span className="month-year">{`${new Date(currentYear, currentMonth).toLocaleString('default', { month: 'long' })} ${currentYear}`}</span>
-                    <button className="nav-button" onClick={handleNextMonth}>{">"}</button>
+                    <button className="nav-button" onClick={() => changeMonth(-1)}>
+                        {"<"}
+                    </button>
+                    <span className="month-year">
+                        {new Date(currentYear, currentMonth).toLocaleString('default', { month: 'long' })} {currentYear}
+                    </span>
+                    <button className="nav-button" onClick={() => changeMonth(1)}>
+                        {">"}
+                    </button>
                 </div>
 
-                <div className="days-of-week">
-                    {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day, index) => (
-                        <div key={index} className="calendar-day header-day">
-                            {day}
-                        </div>
-                    ))}
-                </div>
                 <div className="calendar-grid">
                     {generateCalendar().map((day, index) => {
-                        if (day) {
-                            const taskCount = taskList[day] ? taskList[day].length : 0;
-                            const hasTasks = taskList[day] && taskList[day].length > 0;
-                            const isSelected = day === selectedDate;
-
-                            return (
-                                <div
-                                    key={index}
-                                    className={`calendar-day ${isSelected ? 'selected' : ''}`}
-                                    onClick={() => handleDateClick(day)}
-                                    style={{
-                                        backgroundColor: hasTasks ? '#4CAF50' : '',  // Green if there are tasks
-                                        color: isSelected ? 'white' : '',
-                                        borderColor: isSelected ? '#1976D2' : ''
-                                    }}
-                                >
-                                    <div className="day-number">{day}</div>
-                                    {taskCount > 0 && window.innerWidth >= 768 ? (
-                                        <div className="task-count">{taskCount}</div>
-                                    ) : null}
-                                </div>
-                            );
+                        if (!day) {
+                            return <div key={index} className="calendar-day"></div>;
                         }
-                        return <div key={index} className="calendar-day"></div>;
+
+                        const hasTasks = taskList[day] && taskList[day].length > 0;
+
+                        return (
+                            <div
+                                key={index}
+                                className={`calendar-day ${day === selectedDate ? 'selected' : ''}`}
+                                onClick={() => setSelectedDate(day)}
+                                style={{ backgroundColor: hasTasks ? '#4CAF50' : '' }}
+                            >
+                                {day}
+                            </div>
+                        );
                     })}
                 </div>
+            </div>
 
-                {selectedDate && (
-                    <div className="task-input-container">
+            {selectedDate && (
+                <div className="task-list-container">
+                    <h3>Tasks for {selectedDate}</h3>
+                    <button className="add-task-button" onClick={() => setShowAddTaskPopup(true)}>Add Task</button>
+                    {taskList[selectedDate]?.length > 0 ? (
+                        taskList[selectedDate].map((task, index) => (
+                            <div key={index} className="task-item">
+                                <p><strong>Task Name:</strong> {task.taskName}</p>
+                                <p><strong>Description:</strong> {task.taskDescription}</p>
+                            </div>
+                        ))
+                    ) : (
+                        <p>No tasks for this date.</p>
+                    )}
+                </div>
+            )}
+
+            {showAddTaskPopup && (
+                <div className="add-task-popup">
+                    <div className="popup-card">
+                        <button className="close-button" onClick={() => setShowAddTaskPopup(false)}>X</button>
+                        <h3>Add New Task</h3>
                         <input
                             type="text"
+                            placeholder="Task Name"
                             value={taskName}
                             onChange={(e) => setTaskName(e.target.value)}
-                            placeholder="Add task name"
                         />
-                        <input
-                            type="text"
+                        <textarea
+                            placeholder="Task Description"
                             value={taskDescription}
                             onChange={(e) => setTaskDescription(e.target.value)}
-                            placeholder="Describe task"
                         />
-                        <button className='btn-primary' onClick={handleAddTask}>Add Task</button>
+                        <button className="submit-button" onClick={handleAddTask}>Submit</button>
                     </div>
-                )}
-
-                <div className="task-list">
-                    {selectedDate && taskList[selectedDate] && taskList[selectedDate].map((task, idx) => (
-                        <div key={idx} className="task-item">{task}</div>
-                    ))}
                 </div>
-            </div>
+            )}
         </div>
     );
 };

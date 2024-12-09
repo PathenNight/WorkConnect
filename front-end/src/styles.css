@@ -3,16 +3,17 @@ body {
   font-family: Arial, sans-serif;
   background-color: #f4f4f4;
 }
-img{
-  cursor:pointer
+
+img {
+  cursor: pointer
 }
 
-input{
+input {
   width: 100%;
-    padding: 10px;
-    margin-top: 5px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+  padding: 10px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
 }
 
 button {
@@ -26,58 +27,69 @@ button {
 }
 
 .btn-option-yes {
-  background: linear-gradient(145deg, #6dbf84, #4f9e61); /* Soft green gradient */
+  background: linear-gradient(145deg, #6dbf84, #4f9e61);
+  /* Soft green gradient */
   border: none;
   padding: 12px 25px;
   margin-bottom: 15px;
   margin-top: 30px;
   cursor: pointer;
-  border-radius: 25px; /* Rounded corners */
+  border-radius: 25px;
+  /* Rounded corners */
   font-size: 16px;
   font-weight: bold;
-  transition: all 0.3s ease; /* Smooth transition for hover effects */
-  box-shadow: 0 4px 8px rgba(0, 255, 0, 0.2); /* Soft green shadow */
+  transition: all 0.3s ease;
+  /* Smooth transition for hover effects */
+  box-shadow: 0 4px 8px rgba(0, 255, 0, 0.2);
+  /* Soft green shadow */
 }
 
 .btn-option-no {
-  background: linear-gradient(145deg, #ff7a7a, #e55c5c); /* Soft red gradient */
+  background: linear-gradient(145deg, #ff7a7a, #e55c5c);
+  /* Soft red gradient */
   border: none;
   padding: 12px 25px;
   cursor: pointer;
-  border-radius: 25px; /* Rounded corners */
+  border-radius: 25px;
+  /* Rounded corners */
   font-size: 16px;
   font-weight: bold;
-  transition: all 0.3s ease; /* Smooth transition for hover effects */
-  box-shadow: 0 4px 8px rgba(255, 0, 0, 0.2); /* Soft red shadow */
+  transition: all 0.3s ease;
+  /* Smooth transition for hover effects */
+  box-shadow: 0 4px 8px rgba(255, 0, 0, 0.2);
+  /* Soft red shadow */
 }
 
 /* Hover effect to scale and brighten */
 .btn-option-yes:hover {
   background: linear-gradient(145deg, #6dbf84, #4f9e61);
-  transform: scale(1.01); /* Scale up the button */
-  box-shadow: 0 8px 16px rgba(0, 255, 0, 0.3); /* Larger shadow on hover */
+  transform: scale(1.01);
+  /* Scale up the button */
+  box-shadow: 0 8px 16px rgba(0, 255, 0, 0.3);
+  /* Larger shadow on hover */
 }
 
 .btn-option-no:hover {
   background: linear-gradient(145deg, #ff7a7a, #e55c5c);
-  transform: scale(1.01); /* Scale up the button */
-  box-shadow: 0 8px 16px rgba(255, 0, 0, 0.3); /* Larger shadow on hover */
+  transform: scale(1.01);
+  /* Scale up the button */
+  box-shadow: 0 8px 16px rgba(255, 0, 0, 0.3);
+  /* Larger shadow on hover */
 }
 
-/* Hover effect for all buttons (adding brightness effect) */
-button:hover {
-  background-color: #45a049;
-  transform: scale(1.05); /* Slightly scale the button */
-}
 
 .error-message,
 .success-message {
-    margin: 15px 0;
-    padding: 10px;
-    border-radius: 5px;
-    text-align: center;
+  margin: 15px 0;
+  padding: 10px;
+  border-radius: 5px;
+  text-align: center;
+  opacity: 1;
+  transition: opacity 1s ease-out;
 }
-
+.success-message.fade-out{
+  opacity: 0;
+}
 .login-container {
   display: flex;
   justify-content: center;
@@ -170,11 +182,11 @@ button:hover {
   margin-bottom: 10px;
 }
 
-.btn-margin-top{
+.btn-margin-top {
   margin-top: 10px;
 }
 
-.btn-margin-bottom{
+.btn-margin-bottom {
   margin-bottom: 20px;
 }
 
@@ -228,15 +240,20 @@ button:hover {
 }
 
 .favicon-image {
-  width: 150px; /* You can adjust the size of the logo */
+  width: 150px;
+  /* You can adjust the size of the logo */
   height: 150px;
-  margin-bottom: 20px; /* Space between the logo and the title */
-  display: block; /* Ensures image is block-level for better centering */
+  margin-bottom: 20px;
+  /* Space between the logo and the title */
+  display: block;
+  /* Ensures image is block-level for better centering */
   margin-left: auto;
-  margin-right: auto; /* Horizontally center the image */
+  margin-right: auto;
+  /* Horizontally center the image */
 }
 
 .homepage-container {
+  font-family: Arial, sans-serif;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -249,17 +266,34 @@ button:hover {
   color: white;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
   padding: 10px 20px;
-  background-color: #282c34;
+  background-color: #333;
   color: white;
   width: 100%;
+}
+
+.navbar button {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
 }
 
 .navbar-links {
   display: flex;
   gap: 20px;
+}
+
+.navbar-links button {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  margin-right: 10px;
+  font-size: 16px;
 }
 
 .navbar-links a {
@@ -304,6 +338,7 @@ button:hover {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   padding: 20px;
   text-align: center;
+  margin: 20px 0;
 }
 
 .calendar-header {
@@ -346,15 +381,22 @@ button:hover {
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 10px;
-  margin-bottom: 20px;
+  gap: 5px;
 }
 
 .calendar-day {
+  width: 100%;
+  height: 50px;
+  display: flex;
   position: relative;
   padding: 10px;
   text-align: center;
+  border: 1px solid #ccc;
   font-size: 16px;
+  justify-content: center;
+    align-items: center;
+    background-color: white;
+    border: 1px solid #ccc;
   cursor: pointer;
   border-radius: 4px;
   transition: background-color 0.3s ease;
@@ -362,6 +404,12 @@ button:hover {
 
 .calendar-day:hover {
   background-color: #f4f4f4;
+}
+
+.calendar-day.selected {
+  border: 2px solid #333;
+  color: white;
+  background-color: #1976D2;
 }
 
 .task-count-circle {
@@ -410,7 +458,7 @@ button:hover {
   margin-top: 10px;
 }
 
-.task-input-container button{
+.task-input-container button {
   width: 150px;
   height: 50px;
 }
@@ -430,12 +478,31 @@ button:hover {
   padding: 0;
 }
 
+.task-list-container {
+  margin-top: 20px;
+  width: 100%;
+  max-width: 600px;
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
 .task-item {
-  background-color: #f1f1f1;
+  margin-bottom: 15px;
   padding: 10px;
-  border-radius: 4px;
-  margin-bottom: 5px;
-  font-size: 14px;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.add-task-button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 5px;
+  cursor: pointer;
 }
 
 @media (max-width: 600px) {
@@ -698,7 +765,7 @@ button.brand-name:hover {
   background-color: #45a049;
 }
 
-.brand-name span{
+.brand-name span {
   font-weight: bold;
   color: #ffc107;
   /* Golden hue */
@@ -707,141 +774,139 @@ button.brand-name:hover {
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: "Montserrat", sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Montserrat", sans-serif;
 }
 
 body {
-    width: 100%;
-    min-height: 100vh;
-    padding: 0 10px;
-    display: flex;
-    background: #4176f6;
-    justify-content: center;
-    align-items: center;
+  width: 100%;
+  min-height: 100vh;
+  padding: 0 10px;
+  display: flex;
+  background: #4176f6;
+  justify-content: center;
+  align-items: center;
 }
 
 /* Login form styling */
 .login_form {
-    width: 100%;
-    max-width: 435px;
-    background: #fff;
-    border-radius: 6px;
-    padding: 41px 30px;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  max-width: 435px;
+  background: #fff;
+  border-radius: 6px;
+  padding: 41px 30px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
 }
 
 .login_form h2 {
-    font-size: 25px;
-    text-align: center;
+  font-size: 25px;
+  text-align: center;
 }
 
-/* Google & Apple button styling */
-
 .login_form .login_option {
-    display: flex;
-    width: 100%;
-    justify-content: space-between;
-    align-items: center;
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .login_form .login_option .option {
-    width: calc(100% / 2 - 12px);
+  width: calc(100% / 2 - 12px);
 }
 
 .login_form .login_option .option a {
-    height: 56px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 12px;
-    background: #F8F8FB;
-    border: 1px solid #DADAF2;
-    border-radius: 5px;
-    margin: 34px 0 24px 0;
-    text-decoration: none;
-    color: #171645;
-    font-weight: 500;
-    transition: 0.2s ease;
+  height: 56px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  background: #F8F8FB;
+  border: 1px solid #DADAF2;
+  border-radius: 5px;
+  margin: 34px 0 24px 0;
+  text-decoration: none;
+  color: #171645;
+  font-weight: 500;
+  transition: 0.2s ease;
 }
 
 .login_form .login_option .option a:hover {
-    background: #ededf5;
-    border-color: #4176f6;
+  background: #ededf5;
+  border-color: #4176f6;
 }
 
 .login_form .login_option .option a img {
-    max-width: 25px;
+  max-width: 25px;
 }
 
 .login_form p {
-    text-align: center;
-    font-weight: 500;
+  text-align: center;
+  font-weight: 500;
 }
 
 .login_form .separator span {
-    background: #fff;
-    z-index: 1;
-    padding: 0 10px;
-    position: relative;
+  background: #fff;
+  z-index: 1;
+  padding: 0 10px;
+  position: relative;
 }
 
 .login_form .separator::after {
-    content: '';
-    position: absolute;
-    width: 100%;
-    top: 50%;
-    left: 0;
-    height: 1px;
-    background: #C2C2C2;
-    display: block;
+  content: '';
+  position: absolute;
+  width: 100%;
+  top: 50%;
+  left: 0;
+  height: 1px;
+  background: #C2C2C2;
+  display: block;
 }
 
 form .input_box label {
-    display: block;
-    font-weight: 500;
-    margin-bottom: 8px;
+  display: block;
+  font-weight: 500;
+  margin-bottom: 8px;
 }
 
 /* Input field styling */
 form .input_box input {
-    width: 100%;
-    height: 57px;
-    border: 1px solid #DADAF2;
-    border-radius: 5px;
-    outline: none;
-    background: #F8F8FB;
-    font-size: 17px;
-    padding: 0px 20px;
-    margin-bottom: 25px;
-    transition: 0.2s ease;
+  width: 100%;
+  height: 57px;
+  border: 1px solid #DADAF2;
+  border-radius: 5px;
+  outline: none;
+  background: #F8F8FB;
+  font-size: 17px;
+  padding: 0px 20px;
+  margin-bottom: 25px;
+  transition: 0.2s ease;
 }
 
 form .input_box input:focus {
-    border-color: #4176f6;
+  border-color: #4176f6;
 }
 
 form .input_box .password_title {
-    display: flex;
-    justify-content: space-between;
-    text-align: center;
+  display: flex;
+  justify-content: space-between;
+  text-align: center;
 }
 
 form .input_box {
-    position: relative;
+  position: relative;
 }
 
 form button:hover {
-    background: #4954d0;
+  background: #4954d0;
 }
 
 .login-link {
   cursor: pointer;
   text-decoration: none;
-    color: #626cd6;
-    font-weight: 500;
+  color: #626cd6;
+  font-weight: 500;
 }
 
 .login-link:hover {
@@ -925,6 +990,111 @@ form button:hover {
   transform: scale(1.02);
   box-shadow: 0 8px 16px rgba(0, 255, 0, 0.3);
 }
-.btn-bottom-padding{
+
+.btn-bottom-padding {
   padding-bottom: 20px;
+}
+
+.add-task-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.popup-card {
+  background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    position: relative;
+}
+
+.close-button {
+  background-color: #D32F2F; /* Set a background color */
+    border: none;
+    color: white;
+    font-size: 16px; /* Adjust font size for a smaller button */
+    padding: 5px 10px; /* Adjust padding to make the button compact */
+    cursor: pointer;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: auto; /* Remove any width setting, allowing it to be small */
+    height: auto; /* Remove any height setting */
+    border-radius: 5px; /* Rounded corners for the button */
+}
+
+.submit-button {
+  background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+}
+
+.popup-card h3 {
+  font-size: 20px;
+  margin-bottom: 15px;
+  color: #333;
+  text-align: center;
+}
+
+.popup-card input[type="text"],
+.popup-card textarea {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.popup-card input[type="text"]:focus,
+.popup-card textarea:focus {
+  outline: none;
+  border-color: #1976D2;
+  box-shadow: 0 0 5px rgba(25, 118, 210, 0.5);
+}
+
+.btn-danger {
+  background-color: #dc3545; 
+  color: white; 
+  border: none;
+  padding: 10px 20px; 
+  font-size: 16px; 
+  border-radius: 5px; 
+  cursor: pointer; 
+  transition: background-color 0.3s ease, transform 0.2s ease; 
+}
+
+
+.btn-danger:hover {
+  background-color: #c82333;
+  transform: scale(1.05); 
+}
+
+.btn-danger:focus {
+  outline: none; 
+  box-shadow: 0 0 5px rgba(220, 53, 69, 0.5); 
+}
+
+.btn-danger:disabled {
+  background-color: #e0e0e0;
+  color: #a0a0a0; 
+  cursor: not-allowed; 
+}
+
+
+.btn-margin-top {
+  margin-top: 15px;
 }

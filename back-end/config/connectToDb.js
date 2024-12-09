@@ -3,7 +3,7 @@ const mysql = require("mysql2/promise");
 // Function to create a MySQL connection for querying db
 async function createConnection() {
     try {
-        const db = await mysql.createConnection({
+        const db = await mysql.createPool({
             host: "localhost",
             user: "root",
             password: "",

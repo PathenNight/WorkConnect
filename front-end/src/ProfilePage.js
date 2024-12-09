@@ -1,129 +1,173 @@
-// ProfilePage.js
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
-import "./styles.css"; // Assume the styles from your original CSS are imported here.
+import { useParams, useNavigate, useLocation } from "react-router-dom"; // Import useLocation
+import axios from "axios";
+import "./styles.css";
 
 const ProfilePage = () => {
-  const { userID } = useParams(); // Get the userID from the URL
+  const { userID } = useParams();
+  const navigate = useNavigate();
+  const location = useLocation(); // Get the current location
   const [userData, setUserData] = useState(null);
-  const [editing, setEditing] = useState(false);
   const [formData, setFormData] = useState({
-    name: "",
+    username: "",
+    firstname: "",
+    lastname: "",
     email: "",
-    profilePicture: ""
+    companyName: "",
+    role: ""
   });
+  const [successMessage, setSuccessMessage] = useState("");
+  const [isFading, setIsFading] = useState(false);
 
-  // Fetch user data when the component mounts
   useEffect(() => {
-    // Simulating a fetch call for user data
-    fetch(`/api/users/${userID}`)
-      .then((response) => response.json())
-      .then((data) => {
+    const fetchUserData = async () => {
+      try {
+        const response = await axios.get(`http://localhost:8080/get/users/${userID}`);
+        const data = response.data;
         setUserData(data);
         setFormData({
-          name: data.name,
+          username: data.username,
+          firstname: data.firstname,
+          lastname: data.lastname,
           email: data.email,
-          profilePicture: data.profilePicture
+          companyName: data.companyName,
+          role: data.role
         });
-      })
-      .catch((error) => console.error("Error fetching user data:", error));
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+
+    if (userID) {
+      fetchUserData();
+    }
   }, [userID]);
 
-  const handleEditToggle = () => setEditing(!editing);
+  const handleSubmit = (e) => {
+    e.preventDefault();
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prevData) => ({ ...prevData, [name]: value }));
+    try {
+      axios.put(`http://localhost:8080/update/users/${userID}`, formData);
+      setSuccessMessage("Changes Saved!");
+      setIsFading(false);
+
+      setTimeout(() => {
+        setIsFading(true);
+        setTimeout(() => {
+          setSuccessMessage("");
+        }, 1000);
+      }, 2000);
+    }
+    catch {
+      console.error("Error saving user data.");
+    }
   };
 
-  const handleSaveChanges = () => {
-    // Here we would send a PUT request to save the changes to the backend.
-    fetch(`/api/users/${userID}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(formData)
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        setUserData(data);
-        setEditing(false);
-      })
-      .catch((error) => console.error("Error saving user data:", error));
+  const handleDelete = () => {
+    try {
+      axios.delete(`http://localhost:8080/delete/users/${userID}`);
+      setSuccessMessage("User deleted successfully.");
+      setTimeout(() => {
+        setIsFading(true);
+        setTimeout(() => {
+          setSuccessMessage("");
+          navigate("/");
+        }, 1000);
+      }, 2000);
+    } catch {
+      console.error("Error deleting user");
+    }
+  };
+
+  const handleReturnHome = () => {
+    // Only redirect if we're not already on the /home/:userID route
+    if (!location.pathname.startsWith(`/home/${userID}`)) {
+      navigate(`/home/${userID}`);
+    }
   };
 
   if (!userData) {
-    return <div>Loading...</div>;
+    return <p>Loading...</p>;
   }
 
   return (
-    <div className="profile-page-container">
-      <div className="profile-header">
-        <h2 className="profile-title">{userData.name}</h2>
+    <div className="login-form">
+      <form className="create-form" onSubmit={handleSubmit}>
         <button
-          className="btn-option-yes"
-          onClick={handleEditToggle}
+          type="button"
+          className="btn-primary"
+          onClick={handleReturnHome} // Handle the return home click
         >
-          {editing ? "Cancel" : "Edit"}
+          Return Home
         </button>
-      </div>
-      <div className="profile-card">
-        <div className="profile-image-container">
-          <img
-            src={formData.profilePicture || "/default-avatar.jpg"}
-            alt="Profile"
-            className="profile-image"
+        <img
+          src={`${process.env.PUBLIC_URL}/favicon-formatted.png`}
+          alt="WorkConnect logo"
+          style={{ width: "150px", height: "120px" }}
+          className="favicon-image"
+        />
+        <h2>{formData.username}'s Account Details</h2>
+        {successMessage && (
+          <p className={`success-message ${isFading ? "fade-out" : ""}`}>
+            {successMessage}
+          </p>
+        )}
+        <div className="form-group">
+          <label htmlFor="username">Username</label>
+          <input
+            type="text"
+            id="username"
+            value={formData.username}
+            onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+            placeholder="Enter your username"
+            maxLength={50}
           />
         </div>
-        <div className="profile-details">
-          <div className="profile-detail">
-            <label>Name</label>
-            {editing ? (
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleInputChange}
-              />
-            ) : (
-              <p>{userData.name}</p>
-            )}
-          </div>
-          <div className="profile-detail">
-            <label>Email</label>
-            {editing ? (
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-              />
-            ) : (
-              <p>{userData.email}</p>
-            )}
-          </div>
-          <div className="profile-detail">
-            <label>Profile Picture</label>
-            {editing ? (
-              <input
-                type="text"
-                name="profilePicture"
-                value={formData.profilePicture}
-                onChange={handleInputChange}
-                placeholder="URL to profile picture"
-              />
-            ) : (
-              <p>{userData.profilePicture}</p>
-            )}
-          </div>
-          {editing && (
-            <button className="btn-option-yes" onClick={handleSaveChanges}>
-              Save Changes
-            </button>
-          )}
+        <div className="form-group">
+          <label htmlFor="firstname">First Name</label>
+          <input
+            type="text"
+            id="firstname"
+            value={formData.firstname}
+            onChange={(e) => setFormData({ ...formData, firstname: e.target.value })}
+            placeholder="Enter your first name"
+            maxLength={50}
+          />
         </div>
-      </div>
+        <div className="form-group">
+          <label htmlFor="lastname">Last Name</label>
+          <input
+            type="text"
+            id="lastname"
+            value={formData.lastname}
+            onChange={(e) => setFormData({ ...formData, lastname: e.target.value })}
+            placeholder="Enter your last name"
+            maxLength={50}
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="email">Email</label>
+          <input
+            type="email"
+            id="email"
+            value={formData.email}
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            placeholder="Enter your email"
+            maxLength={50}
+          />
+        </div>
+        <button type="submit" className="btn-primary btn-margin-top">
+          Save Changes
+        </button>
+
+        <button
+          type="button"
+          className="btn-danger btn-margin-top"
+          onClick={handleDelete}
+        >
+          Delete Account
+        </button>
+      </form>
     </div>
   );
 };

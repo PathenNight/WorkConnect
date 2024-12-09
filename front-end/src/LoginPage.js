@@ -20,8 +20,12 @@ const LoginPage = () => {
     navigate('/register/company');
   }
 
-  const navigateForgot = () => {
-    navigate('/forgot');
+  const navigateForgotPassword = () => {
+    navigate('/forgot/password');
+  }
+
+  const navigateForgotUsername = () => {
+    navigate('/forgot/username');
   }
 
   const validateForm = () => {
@@ -77,7 +81,10 @@ const LoginPage = () => {
           {error && <div className="error-message">{error}</div>}
 
           <div className="input_box">
+            <div className="password_title">
             <label htmlFor="username">User Name</label>
+            <a className="login-link" onClick={navigateForgotUsername}>Forgot Username?</a>
+            </div>
             <input
               type="text"
               id="username"
@@ -92,7 +99,7 @@ const LoginPage = () => {
           <div className="input_box">
             <div className="password_title">
               <label htmlFor="password">Password</label>
-              <a className="login-link" onClick={navigateForgot}>Forgot Password?</a>
+              <a className="login-link" onClick={navigateForgotPassword}>Forgot Password?</a>
             </div>
 
             <input

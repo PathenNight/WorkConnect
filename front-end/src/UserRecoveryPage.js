@@ -5,13 +5,13 @@ import "./styles.css";
 
 function RecoveryPage() {
     const [email, setEmail] = useState("");
-    const [securityQuestions, setSecurityQuestions] = useState([]); // Store multiple questions
-    const [answers, setAnswers] = useState({ 1: "", 2: "", 3: "" }); // Answers for the questions
-    const [password, setPassword] = useState(""); // For new password
+    const [securityQuestions, setSecurityQuestions] = useState([]); 
+    const [answers, setAnswers] = useState({ 1: "", 2: "", 3: "" }); 
+    const [username, setUsername] = useState(""); 
     const [error, setError] = useState("");
     const [successMessage, setSuccessMessage] = useState("");
-    const [isVerified, setIsVerified] = useState(false); // Track verification status
-    const [passwordUpdated, setPasswordUpdated] = useState(false); // Track password update status
+    const [isVerified, setIsVerified] = useState(false); 
+    const [usernameUpdated, setUsernameUpdated] = useState(false); 
     const navigate = useNavigate();
 
     const navigateHome = () => {
@@ -61,7 +61,7 @@ function RecoveryPage() {
             const response = await axios.post("http://localhost:8080/verify-answers", { email, answers });
 
             if (response.data.correct) {
-                setSuccessMessage("Answers verified! Please enter a new password.");
+                setSuccessMessage("Answers verified! Please enter a new username.");
                 setIsVerified(true); // Mark as verified
                 setError(""); // Clear any previous errors
             } else {
@@ -72,31 +72,31 @@ function RecoveryPage() {
         }
     };
 
-    const handlePasswordSubmit = async (e) => {
+    const handleUserSubmit = async (e) => {
         e.preventDefault();
 
-        if (!password) {
-            setError("Please enter a new password.");
+        if (!username) {
+            setError("Please enter a new username.");
             return;
         }
 
         try {
-            const response = await axios.put("http://localhost:8080/update/password", { email, password });
+            const response = await axios.put("http://localhost:8080/update/username", { email, username });
 
             if (response.data.changed) {
-                setPasswordUpdated(true); // Set password updated flag
-                setSuccessMessage("Password updated successfully!"); // Notify user of successful update
-                setError(""); // Clear previous errors
+                setUsernameUpdated(true);
+                setSuccessMessage("Username updated successfully!");
+                setError("");
 
-                // Wait for 2 seconds before navigating home
+                
                 setTimeout(() => {
-                    navigateHome(); // Navigate to home after a brief delay
+                    navigateHome();
                 }, 2000);
             } else {
-                setError("Error updating password. Please try again.");
+                setError("Error updating username. Please try again.");
             }
         } catch (err) {
-            setError("Error updating password. Please try again.");
+            setError("Error updating username. Please try again.");
         }
     };
 
@@ -154,22 +154,21 @@ function RecoveryPage() {
                 )
             )}
 
-            {/* Step 3: Enter new password */}
-            {isVerified && successMessage.includes("Please enter a new password") && (
-                <form onSubmit={handlePasswordSubmit} className="create-form">
+            {isVerified && successMessage.includes("Please enter a new username") && (
+                <form onSubmit={handleUserSubmit} className="create-form">
                     <div className="form-group">
-                        <label htmlFor="password">New Password</label>
+                        <label htmlFor="username">New Username</label>
                         <input
-                            type="password"
-                            id="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            placeholder="Enter your new password"
+                            type="username"
+                            id="username"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            placeholder="Enter your new username"
                         />
                     </div>
 
                     <button type="submit" className="btn-primary">
-                        Update Password
+                        Update Username
                     </button>
                 </form>
             )}

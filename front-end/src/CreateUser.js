@@ -25,7 +25,7 @@ function CreateUser() {
 
     const navigateHome = () => {
         navigate('/');
-    }
+    };
 
     const validateForm = () => {
         const newErrors = {};
@@ -33,6 +33,12 @@ function CreateUser() {
         if (!Username) newErrors.Username = "Username is required.";
         if (!Lastname) newErrors.Lastname = "Last name is required.";
         if (!Email) newErrors.Email = "Email is required.";
+
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (Email && !emailPattern.test(Email)) {
+        newErrors.Email = "Please enter a valid email.";
+    }
+
         if (!Password) newErrors.Password = "Password is required.";
         if (!CompanyName) newErrors.CompanyName = "Company name is required.";
         if (!SecurityQuestion1) newErrors.SecurityQuestion1 = "Please select a security question.";
@@ -59,20 +65,22 @@ function CreateUser() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (validateForm()) {
-
             try {
                 const response = await axios.post('http://localhost:8080/get/validate-email', { Email: Email });
                 if (response.data.isValid) {
                     setErrors({});
                 } else {
                     setErrors({ Email: "This email is already in use." });
+                    return;
                 }
             } catch (error) {
                 console.error("Email validation failed:", error);
                 setErrors({ Email: "Unable to validate email at the moment. Please try again later." });
+                return;
             }
-            axios
-                .post("http://localhost:8080/create/user", {
+
+            try {
+                await axios.post("http://localhost:8080/create/user", {
                     Username,
                     Password,
                     Firstname,
@@ -85,187 +93,189 @@ function CreateUser() {
                     SecurityAnswer2,
                     SecurityQuestion3,
                     SecurityAnswer3
-                })
-                .then(res => {
-                    setSuccessMessage(
-                        `Account created successfully!`
-                    );
-                    setIsAccountCreated(true);
-                    setUsername("");
-                    setFirstname("");
-                    setLastname("");
-                    setEmail("");
-                    setPassword("");
-                    setCompanyName("");
-                    setSecurityQuestion1("");
-                    setSecurityAnswer1("");
-                    setSecurityQuestion2("");
-                    setSecurityAnswer2("");
-                    setSecurityQuestion3("");
-                    setSecurityAnswer3("");
-                })
-                .catch(err => {
-                    console.error("Error creating user:", err.response || err);
-                    setErrors({ server: "Failed to create user. Please try again later." });
                 });
+
+                // Handle successful account creation
+                setSuccessMessage("Account created successfully!");
+                setIsAccountCreated(true);
+
+                // Reset form values after successful account creation
+                setUsername("");
+                setFirstname("");
+                setLastname("");
+                setEmail("");
+                setPassword("");
+                setCompanyName("");
+                setSecurityQuestion1("");
+                setSecurityAnswer1("");
+                setSecurityQuestion2("");
+                setSecurityAnswer2("");
+                setSecurityQuestion3("");
+                setSecurityAnswer3("");
+            } catch (err) {
+                console.error("Error creating user:", err.response || err);
+                setErrors({ server: "Failed to create user. Please try again later." });
+            }
         }
     };
 
+    return (
+        <div className="login-form">
 
-const handleReturnToLogin = () => {
-    navigate('/');
-};
+            {!isAccountCreated ? (
+                <form className="create-form" onSubmit={handleSubmit}>
+                    <img
+                        src={`${process.env.PUBLIC_URL}/favicon-formatted.png`}
+                        alt="WorkConnect logo"
+                        style={{ width: "150px", height: "120px" }}
+                        className="favicon-image"
+                        onClick={navigateHome}
+                    />
+                    <h2>Create Your Account</h2>
+                    
+                    {errors.server && <div className="error-message">{errors.server}</div>}
+                    {successMessage && <div className="success-message">{successMessage}</div>}
 
-return (
-    <div className="login-form">
-        {!isAccountCreated ?
-            <form className="create-form" onSubmit={handleSubmit}>
-                <img
-                    src={`${process.env.PUBLIC_URL}/favicon-formatted.png`}
-                    alt="WorkConnect logo"
-                    style={{ width: "150px", height: "120px" }}
-                    className="favicon-image"
-                    onClick={navigateHome}
-                />
-                <h2>Create Your Account</h2>
-                {errors.server && <div className="error-message">{errors.server}</div>}
-                {successMessage && <div className="success-message">{successMessage}</div>}
+                    {/* Form Fields */}
+                    <div className="form-group">
+                        <label htmlFor="firstname">First Name</label>
+                        <input
+                            type="text"
+                            id="firstname"
+                            value={Firstname}
+                            onChange={(e) => setFirstname(e.target.value)}
+                            placeholder="Enter your first name"
+                            maxLength={50}
+                        />
+                        {errors.Firstname && <span className="error">{errors.Firstname}</span>}
+                    </div>
 
-                <div className="form-group">
-                    <label htmlFor="name">First Name</label>
-                    <input
-                        type="text"
-                        id="firstName"
-                        value={Firstname}
-                        onChange={(e) => setFirstname(e.target.value)}
-                        placeholder="Enter your first name"
-                        maxLength={50}
-                    />
-                    {errors.Firstname && <span className="error">{errors.Firstname}</span>}
-                </div>
-                <div className="form-group">
-                    <label htmlFor="name">Last Name</label>
-                    <input
-                        type="text"
-                        id="LastName"
-                        value={Lastname}
-                        onChange={(e) => setLastname(e.target.value)}
-                        placeholder="Enter your first name"
-                        maxLength={50}
-                    />
-                    {errors.Lastname && <span className="error">{errors.Lastname}</span>}
-                </div>
-                <div className="form-group">
-                    <label htmlFor="name">Username</label>
-                    <input
-                        type="text"
-                        id="username"
-                        value={Username}
-                        onChange={(e) => setUsername(e.target.value)}
-                        placeholder="Enter your first name"
-                        maxLength={50}
-                    />
-                    {errors.Username && <span className="error">{errors.Username}</span>}
-                </div>
-                <div className="form-group">
-                    <label htmlFor="email">Email</label>
-                    <input
-                        type="email"
-                        id="email"
-                        value={Email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="Enter your email"
-                        maxLength={50}
-                    />
-                    {errors.Email && <span className="error">{errors.Email}</span>}
-                </div>
-                <div className="form-group">
-                    <label htmlFor="password">Password</label>
-                    <input
-                        type="password"
-                        id="password"
-                        value={Password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder="Enter your password"
-                        maxLength={50}
-                    />
-                    {errors.Password && <span className="error">{errors.Password}</span>}
-                </div>
-                <div className="form-group">
-                    <label htmlFor="orgName">Company Name</label>
-                    <input
-                        type="text"
-                        id="orgName"
-                        value={CompanyName}
-                        onChange={(e) => setCompanyName(e.target.value)}
-                        placeholder='Company Name'
-                        maxLength={50}
-                    />
-                    {errors.CompanyName && <span className="error">{errors.CompanyName}</span>}
-                </div>
-                <SecurityQuestionDropdown onQuestionSelect={handleSecurityQuestion1Change} />
-                <div className="form-group">
-                    <label htmlFor="securityAnswer1">Answer 1</label>
-                    <input
-                        type="text"
-                        id="securityAnswer1"
-                        value={SecurityAnswer1}
-                        onChange={(e) => setSecurityAnswer1(e.target.value)}
-                        placeholder="Enter your answer"
-                        maxLength={50}
-                    />
-                    {errors.SecurityAnswer1 && <span className="error">{errors.SecurityAnswer1}</span>}
-                </div>
-                <SecurityQuestionDropdown onQuestionSelect={handleSecurityQuestion2Change} />
-                <div className="form-group">
-                    <label htmlFor="securityAnswer2">Answer 2</label>
-                    <input
-                        type="text"
-                        id="securityAnswer2"
-                        value={SecurityAnswer2}
-                        onChange={(e) => setSecurityAnswer2(e.target.value)}
-                        placeholder="Enter your answer"
-                        maxLength={50}
-                    />
-                    {errors.SecurityAnswer2 && <span className="error">{errors.SecurityAnswer2}</span>}
-                </div>
-                <SecurityQuestionDropdown onQuestionSelect={handleSecurityQuestion3Change} />
-                <div className="form-group">
-                    <label htmlFor="securityAnswer3">Answer 3</label>
-                    <input
-                        type="text"
-                        id="securityAnswer3"
-                        value={SecurityAnswer3}
-                        onChange={(e) => setSecurityAnswer3(e.target.value)}
-                        placeholder="Enter your answer"
-                        maxLength={50}
-                    />
-                    {errors.SecurityAnswer3 && <span className="error">{errors.SecurityAnswer3}</span>}
-                </div>
-                <button type="submit" className="btn-primary btn-margin-top">
-                    Create Account
-                </button>
-            </form>
-            : (
+                    <div className="form-group">
+                        <label htmlFor="lastname">Last Name</label>
+                        <input
+                            type="text"
+                            id="lastname"
+                            value={Lastname}
+                            onChange={(e) => setLastname(e.target.value)}
+                            placeholder="Enter your last name"
+                            maxLength={50}
+                        />
+                        {errors.Lastname && <span className="error">{errors.Lastname}</span>}
+                    </div>
+
+                    <div className="form-group">
+                        <label htmlFor="username">Username</label>
+                        <input
+                            type="text"
+                            id="username"
+                            value={Username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            placeholder="Enter your username"
+                            maxLength={50}
+                        />
+                        {errors.Username && <span className="error">{errors.Username}</span>}
+                    </div>
+
+                    <div className="form-group">
+                        <label htmlFor="email">Email</label>
+                        <input
+                            type="email"
+                            id="email"
+                            value={Email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder="Enter your email"
+                            maxLength={50}
+                        />
+                        {errors.Email && <span className="error">{errors.Email}</span>}
+                    </div>
+
+                    <div className="form-group">
+                        <label htmlFor="password">Password</label>
+                        <input
+                            type="password"
+                            id="password"
+                            value={Password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            placeholder="Enter your password"
+                            maxLength={50}
+                        />
+                        {errors.Password && <span className="error">{errors.Password}</span>}
+                    </div>
+
+                    <div className="form-group">
+                        <label htmlFor="companyName">Company Name</label>
+                        <input
+                            type="text"
+                            id="companyName"
+                            value={CompanyName}
+                            onChange={(e) => setCompanyName(e.target.value)}
+                            placeholder="Enter your company name"
+                            maxLength={50}
+                        />
+                        {errors.CompanyName && <span className="error">{errors.CompanyName}</span>}
+                    </div>
+
+                    {/* Security Question Fields */}
+                    <SecurityQuestionDropdown onQuestionSelect={handleSecurityQuestion1Change} />
+                    <div className="form-group">
+                        <label htmlFor="securityAnswer1">Answer 1</label>
+                        <input
+                            type="text"
+                            id="securityAnswer1"
+                            value={SecurityAnswer1}
+                            onChange={(e) => setSecurityAnswer1(e.target.value)}
+                            placeholder="Enter your answer"
+                            maxLength={50}
+                        />
+                        {errors.SecurityAnswer1 && <span className="error">{errors.SecurityAnswer1}</span>}
+                    </div>
+
+                    <SecurityQuestionDropdown onQuestionSelect={handleSecurityQuestion2Change} />
+                    <div className="form-group">
+                        <label htmlFor="securityAnswer2">Answer 2</label>
+                        <input
+                            type="text"
+                            id="securityAnswer2"
+                            value={SecurityAnswer2}
+                            onChange={(e) => setSecurityAnswer2(e.target.value)}
+                            placeholder="Enter your answer"
+                            maxLength={50}
+                        />
+                        {errors.SecurityAnswer2 && <span className="error">{errors.SecurityAnswer2}</span>}
+                    </div>
+
+                    <SecurityQuestionDropdown onQuestionSelect={handleSecurityQuestion3Change} />
+                    <div className="form-group">
+                        <label htmlFor="securityAnswer3">Answer 3</label>
+                        <input
+                            type="text"
+                            id="securityAnswer3"
+                            value={SecurityAnswer3}
+                            onChange={(e) => setSecurityAnswer3(e.target.value)}
+                            placeholder="Enter your answer"
+                            maxLength={50}
+                        />
+                        {errors.SecurityAnswer3 && <span className="error">{errors.SecurityAnswer3}</span>}
+                    </div>
+
+                    <button type="submit" className="btn-primary">Create Account</button>
+                </form>
+            ) : (
                 <div className="success-container">
-                    <div className='success-message'>
+                    <div className="success-message">
                         <img
                             src={`${process.env.PUBLIC_URL}/favicon.png`}
                             alt="WorkConnect logo"
                             style={{ width: "200px", height: "200px" }}
                             className="favicon-image"
                         />
-                        <h1 className='recovery-message'>Account Created Successfully!</h1>
-                        <br />
-                        <br />
-                        <button className='btn-primary' onClick={handleReturnToLogin}>
-                            Return to Login
-                        </button>
+                        <h1>Account Created Successfully!</h1>
+                        <button className="btn-primary" onClick={navigateHome}>Go to Home Page</button>
                     </div>
                 </div>
             )}
-    </div>
-);
-};
+        </div>
+    );
+}
 
 export default CreateUser;

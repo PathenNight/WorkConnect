@@ -31,57 +31,59 @@ function CreateCompany() {
 
     const validateForm = (data, step) => {
         const newErrors = {};
-        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    
         if (step === 1) {
-            // Validate email
-            if (!data.Email) {
-                newErrors.Email = "Email is required.";
-            } else if (!emailRegex.test(data.Email)) {
-                newErrors.Email = "Please enter a valid email address.";
-            }
-            // Validate other fields
+            // Validate form fields for step 1
+            const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            if (!data.Email) newErrors.Email = "Email is required.";
+            else if (!emailRegex.test(data.Email)) newErrors.Email = "Please enter a valid email address.";
             if (!data.Firstname) newErrors.Firstname = 'First name is required.';
             if (!data.Lastname) newErrors.Lastname = 'Last name is required.';
             if (!data.Username) newErrors.Username = 'Username is required.';
             if (!data.Password) newErrors.Password = 'Password is required.';
-            if (!data.SecurityQuestion1) {
-                newErrors.SecurityQuestion1 = 'Select a security question.';
-            }
-            if (!data.SecurityAnswer1) {
-                newErrors.SecurityAnswer1 = 'Answer the security question.';
-            }
-            if (!data.SecurityQuestion2) {
-                newErrors.SecurityQuestion2 = 'Select a security question.';
-            }
-            if (!data.SecurityAnswer2) {
-                newErrors.SecurityAnswer2 = 'Answer the security question.';
-            }
-            if (!data.SecurityQuestion3) {
-                newErrors.SecurityQuestion3 = 'Select a security question.';
-            }
-            if (!data.SecurityAnswer3) {
-                newErrors.SecurityAnswer3 = 'Answer the security question.';
-            }
+            if (!data.SecurityQuestion1) newErrors.SecurityQuestion1 = 'Select a security question.';
+            if (!data.SecurityAnswer1) newErrors.SecurityAnswer1 = 'Answer the security question.';
+            if (!data.SecurityQuestion2) newErrors.SecurityQuestion2 = 'Select a security question.';
+            if (!data.SecurityAnswer2) newErrors.SecurityAnswer2 = 'Answer the security question.';
+            if (!data.SecurityQuestion3) newErrors.SecurityQuestion3 = 'Select a security question.';
+            if (!data.SecurityAnswer3) newErrors.SecurityAnswer3 = 'Answer the security question.';
         } else if (step === 2) {
+            // Validate company form fields
             if (!data.CompanyName) newErrors.CompanyName = 'Company name is required.';
             if (!data.CompanyIndustry) newErrors.CompanyIndustry = 'Company industry is required.';
             if (!data.CompanyAddress) newErrors.CompanyAddress = 'Company address is required.';
         }
     
-        setErrors(newErrors); // Update state with errors
-        return Object.keys(newErrors).length === 0; // Return if no errors
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
     };
-
+    
+    const validateCompany = async () => {
+        try {
+            const response = await axios.post('http://localhost:8080/get/validate-company', { companyName: companyData.CompanyName });
+            if (!response.data.isValid) {
+                setErrors((prevErrors) => ({
+                    ...prevErrors,
+                    CompanyName: `${companyData.CompanyName} is already registered with WorkConnect! Please create an account instead.`,
+                }));
+                return false; // Company already exists
+            }
+            return true; // Company is valid
+        } catch (error) {
+            console.error('Company validation failed:', error);
+            setErrors({ server: 'Unable to validate company at the moment. Please try again later.' });
+            return false; // Error with validation
+        }
+    };
+    
     const handleNext = async (e) => {
         e.preventDefault();
-
-        // Run validation and stop execution if it fails
+    
+        // Run validation for step 1
         if (!validateForm(accountData, 1)) {
             console.log("Form not valid");
-            return; // Stop here if the form has errors
+            return; // Stop if form is not valid
         }
-
+    
         // Check email availability via API
         try {
             const response = await axios.post('http://localhost:8080/get/validate-email', { Email: accountData.Email });
@@ -100,26 +102,36 @@ function CreateCompany() {
             }));
             return;
         }
-
-        // If validation and API checks pass, proceed to the next step
+    
+        // Proceed to step 2 if email is valid
         setStep(2);
         setErrors({});
     };
-
+    
     const handleCompanySubmit = async (e) => {
         e.preventDefault();
-        if (validateForm(companyData, 2)) {
-            try {
-                await axios.post('http://localhost:8080/create/company', {
-                    ...accountData,
-                    ...companyData
-                });
-                setSuccessMessage('Account and Company created successfully!');
-                setTimeout(() => navigate('/'), 2000); // Redirect to home after 2 seconds
-            } catch (err) {
-                console.error('Error creating company:', err.response || err);
-                setErrors({ server: 'Failed to create company. Please try again later.' });
-            }
+    
+        // Run form validation for step 2
+        if (!validateForm(companyData, 2)) {
+            console.log("Company form not valid");
+            return; // Stop if company form is not valid
+        }
+    
+        // Validate company availability before submitting
+        const isCompanyValid = await validateCompany();
+        if (!isCompanyValid) return; // Stop submission if company is already registered
+    
+        // If everything is valid, submit the form
+        try {
+            await axios.post('http://localhost:8080/create/company', {
+                ...accountData,
+                ...companyData
+            });
+            setSuccessMessage('Account and Company created successfully!');
+            setTimeout(() => navigate('/'), 2000); // Redirect after 2 seconds
+        } catch (err) {
+            console.error('Error creating company:', err.response || err);
+            setErrors({ server: 'Failed to create company. Please try again later.' });
         }
     };
 
@@ -219,7 +231,6 @@ function CreateCompany() {
                                         SecurityQuestion1: question ? undefined : 'Select a security question.',
                                     }));
                                 }}
-                                error={errors.SecurityQuestion1}
                             />
                             {errors.SecurityQuestion1 && <span className="error">Select a security question</span>}
                             <div className="form-group">
